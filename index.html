@@ -13,7 +13,7 @@
             -webkit-user-select: none;
             user-select: none;
         }
-        canvas { display: block; }
+        canvas { display: block; width: 100%; height: 100%; }
         #hint {
             position: absolute; top: 60px; width: 100%; text-align: center;
             color: rgba(255, 255, 255, 0.7); font-size: 15px; pointer-events: none;
@@ -48,6 +48,8 @@
             backdrop-filter: blur(8px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             width: 220px;
+            max-height: 200px;
+            overflow-y: auto;
         }
         #song-menu.show {
             display: block;
@@ -81,17 +83,18 @@
         }
         #menu-toggle-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: white; }
 
-        /* Estilos Responsivos de la Carta Mágica */
+        /* Estilos Responsivos de la Carta Mágica (Más grande y centrada) */
         #letter-modal {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) scale(0);
-            width: 85%;
-            max-width: 340px;
+            width: 90%;
+            max-width: 450px;
+            max-height: 100vh;
             background: #fff9f0;
             border: 2px solid #e6ccb2;
-            padding: 25px 20px;
+            padding: 30px;
             box-shadow: 0 15px 50px rgba(0,0,0,0.7);
             border-radius: 16px;
             text-align: center;
@@ -100,6 +103,8 @@
             transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             pointer-events: none;
             box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
         }
 
         #letter-modal.show {
@@ -110,29 +115,47 @@
 
         #letter-modal h2 {
             color: #593340;
-            margin-top: 0;
+            margin: 0 0 20px 0;
             font-family: serif;
             letter-spacing: 1px;
-            font-size: 22px;
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        /* Contenedor del texto con scroll y centrado */
+        #letter-text-container {
+            overflow-y: auto;
+            flex-grow: 1;
+            padding-right: 5px;
+            margin-bottom: 25px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         #letter-modal p {
             color: #4a3b40;
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 25px;
+            font-size: 15px;
+            line-height: 1.8;
+            margin: 0;
+            padding: 0 10px;
+            text-align: center;
         }
 
         #close-letter {
             background: #b85c74;
             border: none;
             color: white;
-            padding: 10px 24px;
+            padding: 12px 30px;
             border-radius: 20px;
             font-family: inherit;
-            font-size: 13px;
+            font-size: 14px;
             cursor: pointer;
             transition: background 0.3s;
+            align-self: center;
+            flex-shrink: 0;
+            margin-top: auto;
         }
 
         #close-letter:hover {
@@ -161,8 +184,10 @@
     <button id="reset-btn" class="top-btn">Limpiar</button>
     
     <div id="letter-modal">
-        <h2>Hola Coazon💗</h2>
-        <p>Has cultivado un hermoso ramo con mucho cuidado. Wao un mesesito ya como novios no se como se haga , Feliz Primer Mes corazoon este anque no sea la gran cosa es un detallito esta echo con muchisimo cariño y amor para recordarte cuanto te amo ya que desde de el primer moento en que te conoci supe que tenias algo que me encanto desde el primer segundo, es algo hizo que me enamorara cada vez mas de ti hasta este punto que amo todo de ti desde como te mira,tu cabello tu sonrisa TUS OJOS tu manera de vestir , hasta como hablas te expresas respiras,haci como los pequeños detalles que tienes conmigo cualquier cosita que me regales yo aprecio mucho eso,Amo La Gran e infinita paciencia que me tienes porque dios corazon me tienes una paciencia que no se de donde sacas tanta,Amo el tiempo que paso contigo haci san una dos tres horas incluso 5 minutos,Anque se que no soy ni de cerca el mejor novio gracias a ti e mejorado bastante <br> Te Amo Demasiado Mi amor no tienes idea cuanto 💗.</p>
+        <h2>Hola Corazon 💗</h2>
+        <div id="letter-text-container">
+            <p>Has cultivado un hermoso ramo con mucho cuidado. Wao un mesesito ya como novios no se como se haga , Feliz Primer Mes corazoon este anque no sea la gran cosa es un detallito esta echo con muchisimo cariño y amor para recordarte cuanto te amo ya que desde de el primer moento en que te conoci supe que tenias algo que me encanto desde el primer segundo, es algo hizo que me enamorara cada vez mas de ti hasta este punto que amo todo de ti desde como te mira,tu cabello tu sonrisa TUS OJOS tu manera de vestir , hasta como hablas te expresas respiras,haci como los pequeños detalles que tienes conmigo cualquier cosita que me regales yo aprecio mucho eso,Amo La Gran e infinita paciencia que me tienes porque dios corazon me tienes una paciencia que no se de donde sacas tanta,Amo el tiempo que paso contigo haci san una dos tres horas incluso 5 minutos,Anque se que no soy ni de cerca el mejor novio gracias a ti e mejorado bastante <br><br> Te Amo Demasiado Mi amor no tienes idea cuanto 💗.</p>
+        </div>
         <button id="close-letter">Cerrar carta</button>
     </div>
 
@@ -179,7 +204,11 @@
             canvas.height = window.innerHeight;
         }
         window.addEventListener('resize', resize);
+        
+        // Prevención de bugs de renderizado inicial en móviles
         resize();
+        setTimeout(resize, 100);
+        setTimeout(resize, 500);
 
         let musicPlaying = false;
         const musicBtn = document.getElementById('music-btn');
@@ -518,7 +547,7 @@
         }
 
         window.addEventListener('pointerdown', (e) => {
-            if (e.target.closest('#music-container') || e.target.id === 'reset-btn' || e.target.id === 'close-letter') return;
+            if (e.target.closest('#music-container') || e.target.id === 'reset-btn' || e.target.id === 'close-letter' || e.target.closest('#letter-modal')) return;
             handlePlant(e.clientX, e.clientY);
         });
 
