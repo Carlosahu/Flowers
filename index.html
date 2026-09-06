@@ -34,9 +34,7 @@
         /* Contenedor del Mini Menú de Música */
         #music-container {
             position: absolute; top: 20px; left: 20px; z-index: 20;
-        }
-        #music-btn {
-            position: relative; top: 0; left: 0;
+            display: flex; gap: 8px;
         }
         #song-menu {
             display: none;
@@ -49,7 +47,7 @@
             padding: 8px;
             backdrop-filter: blur(8px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            width: 200px;
+            width: 220px;
         }
         #song-menu.show {
             display: block;
@@ -74,6 +72,14 @@
             color: #ff99cc;
             font-weight: bold;
         }
+
+        /* Botón desplegable del menú de canciones */
+        #menu-toggle-btn {
+            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white; padding: 8px 12px; border-radius: 20px; font-family: inherit; font-size: 12px;
+            cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(5px);
+        }
+        #menu-toggle-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: white; }
 
         /* Estilos Responsivos de la Carta Mágica */
         #letter-modal {
@@ -140,9 +146,10 @@
     
     <div id="music-container">
         <button id="music-btn" class="top-btn">🎵 Música: OFF</button>
+        <button id="menu-toggle-btn">▼</button>
         <div id="song-menu">
-            <button class="song-option active" data-src="stargirl - ADTurnUp.mp3"">🎶 Canción 1 stargirl </button>
-            <button class="song-option" data-src="https://actions.google.com/sounds/v1/ambiences/rain_heavy.ogg">🎶 Canción 2 (Lluvia)</button>
+            <button class="song-option active" data-src="stargirl - ADTurnUp.mp3">🎶 Canción 1: Stargirl</button>
+            <button class="song-option" data-src="Racing Mind - Lovely Girl.mp3">🎶 Canción 2 (Lluvia)</button>
             <button class="song-option" data-src="https://actions.google.com/sounds/v1/ambiences/gentle_wind.ogg">🎶 Canción 3 (Viento)</button>
         </div>
     </div>
@@ -170,19 +177,40 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // --- LÓGICA DEL MINI MENÚ DE MÚSICA MP3 ---
+        // --- LÓGICA DE REPRODUCCIÓN Y PAUSA ---
         let musicPlaying = false;
         const musicBtn = document.getElementById('music-btn');
+        const menuToggleBtn = document.getElementById('menu-toggle-btn');
         const songMenu = document.getElementById('song-menu');
         const audio = document.getElementById('bg-audio');
         const songOptions = document.querySelectorAll('.song-option');
 
-        // Configurar la primera canción por defecto
+        // Configurar la primera canción por defecto al iniciar
         let currentSongSrc = songOptions[0].getAttribute('data-src');
         audio.src = currentSongSrc;
 
-        // Abrir/Cerrar menú al hacer clic en el botón de música
+        // Botón principal: Alternar entre Reproducir y Pausar
         musicBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            songMenu.classList.remove('show');
+
+            if (!musicPlaying) {
+                audio.play().then(() => {
+                    musicPlaying = true;
+                    musicBtn.textContent = '🎵 Música: ON';
+                }).catch(err => {
+                    console.log("Error al reproducir audio:", err);
+                    musicBtn.textContent = '🎵 Error de Audio';
+                });
+            } else {
+                audio.pause();
+                musicPlaying = false;
+                musicBtn.textContent = '⏸️ Música: Pausada';
+            }
+        });
+
+        // Botón flecha: Desplegar el menú de canciones
+        menuToggleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             songMenu.classList.toggle('show');
         });
@@ -192,7 +220,7 @@
             songMenu.classList.remove('show');
         });
 
-        // Seleccionar canción del menú
+        // Seleccionar canción del menú desplegable
         songOptions.forEach(option => {
             option.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -202,21 +230,18 @@
                 currentSongSrc = option.getAttribute('data-src');
                 audio.src = currentSongSrc;
                 
-                // Forzar reproducción inmediata al cambiar de canción
+                // Reproducir automáticamente la nueva canción seleccionada
                 audio.play().then(() => {
                     musicPlaying = true;
                     musicBtn.textContent = '🎵 Música: ON';
                 }).catch(err => {
-                    console.log("Error al reproducir audio:", err);
+                    console.log("No se pudo reproducir la canción seleccionada:", err);
                 });
 
                 songMenu.classList.remove('show');
             });
         });
 
-        // Permitir alternar ON/OFF tocando el botón principal si ya hay una canción seleccionada
-        // (Opcional: puedes usar el menú para alternar, pero esto da control rápido)
-        
         // Partículas de polvo estelar sutiles
         const dustParticles = Array.from({ length: 50 }, () => ({
             x: Math.random() * window.innerWidth,
