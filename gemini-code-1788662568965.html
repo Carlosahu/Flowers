@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Magical Flower Bouquet</title>
+    <style>
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
+            overflow: hidden; background: radial-gradient(circle at center, #2a1420 0%, #12090e 100%);
+            font-family: 'Courier New', Courier, monospace;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        canvas { display: block; }
+        #hint {
+            position: absolute; top: 25px; width: 100%; text-align: center;
+            color: rgba(255, 255, 255, 0.7); font-size: 15px; pointer-events: none;
+            letter-spacing: 2px; text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+            z-index: 5; padding: 0 15px; box-sizing: border-box;
+        }
+        
+        /* Botones superiores */
+        .top-btn {
+            position: absolute; top: 20px;
+            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white; padding: 8px 16px; border-radius: 20px; font-family: inherit; font-size: 12px;
+            cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(5px); z-index: 10;
+        }
+        .top-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: white; }
+        #music-btn { left: 20px; }
+        #reset-btn { right: 20px; }
+
+        /* Estilos Responsivos de la Carta Mágica */
+        #letter-modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 85%;
+            max-width: 340px;
+            background: #fff9f0;
+            border: 2px solid #e6ccb2;
+            padding: 25px 20px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.7);
+            border-radius: 16px;
+            text-align: center;
+            z-index: 100;
+            opacity: 0;
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+            box-sizing: border-box;
+        }
+
+        #letter-modal.show {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #letter-modal h2 {
+            color: #593340;
+            margin-top: 0;
+            font-family: serif;
+            letter-spacing: 1px;
+            font-size: 22px;
+        }
+
+        #letter-modal p {
+            color: #4a3b40;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        #close-letter {
+            background: #b85c74;
+            border: none;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 20px;
+            font-family: inherit;
+            font-size: 13px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #close-letter:hover {
+            background: #994a5e;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="hint">✿ Toca la pantalla para armar tu ramo (6 flores) ✿</div>
+    <button id="music-btn" class="top-btn">🎵 Música: OFF</button>
+    <button id="reset-btn" class="top-btn">Limpiar / Reset</button>
+    
+    <div id="letter-modal">
+        <h2>Para ti 💌</h2>
+        <p>Has cultivado un hermoso ramo con mucho cuidado. Que cada flor te recuerde lo especial que eres y la magia que hay en los pequeños detalles de la vida.</p>
+        <button id="close-letter">Cerrar carta</button>
+    </div>
+
+    <audio id="bg-audio" loop>
+        <source src="Sammer x Khea - LLAMARTE REMIX (Video Oficial)(mp3j.cc).mp3" type="audio/ogg">
+        Tu navegador no soporta el elemento de audio.
+    </audio>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d', { alpha: false }); 
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Control de Música Directo
+        let musicPlaying = false;
+        const musicBtn = document.getElementById('music-btn');
+        const audio = document.getElementById('bg-audio');
+        
+        musicBtn.addEventListener('click', () => {
+            musicPlaying = !musicPlaying;
+            
+            if (musicPlaying) {
+                audio.play().then(() => {
+                    musicBtn.textContent = '🎵 Música: ON';
+                }).catch(error => {
+                    console.log("Error al reproducir audio:", error);
+                    musicPlaying = false;
+                });
+            } else {
+                audio.pause();
+                musicBtn.textContent = '🎵 Música: OFF';
+            }
+        });
+
+        // Partículas de polvo estelar sutiles
+        const dustParticles = Array.from({ length: 50 }, () => ({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            size: Math.random() * 2 + 0.5,
+            alpha: Math.random(),
+            speedY: (Math.random() - 1) * 0.4
+        }));
+
+        function drawBackground() {
+            let bgGrad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, 50, canvas.width/2, canvas.height/2, Math.max(canvas.width, canvas.height));
+            bgGrad.addColorStop(0, '#2a1420');
+            bgGrad.addColorStop(1, '#12090e');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height); 
+            
+            dustParticles.forEach(p => {
+                ctx.fillStyle = `rgba(255, 230, 200, ${p.alpha})`;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                p.y += p.speedY;
+                p.alpha += (Math.random() - 0.5) * 0.05;
+                if (p.alpha < 0.1) p.alpha = 0.1;
+                if (p.alpha > 0.6) p.alpha = 0.6;
+                if (p.y < 0) p.y = canvas.height;
+            });
+        }
+
+        class Flower {
+            constructor(x, y, forcedType) {
+                this.baseTargetX = x; 
+                this.baseTargetY = y;
+                
+                const centerX = canvas.width / 2;
+                const sideOffset = (x - centerX) * 0.15; 
+                this.startX = centerX + sideOffset + (Math.random() - 0.5) * 20; 
+                this.startY = canvas.height + 20; 
+                
+                this.stemGrowth = 0; 
+                this.bloomGrowth = 0;
+                
+                this.swaySpeed = Math.random() * 0.002 + 0.001; 
+                this.swayAmount = Math.random() * 20 + 15; 
+                this.swayOffset = Math.random() * Math.PI * 2; 
+
+                this.flowerType = forcedType;
+                this.size = Math.random() * 8 + 26; 
+                
+                const midX = (this.startX + this.baseTargetX) / 2;
+                this.baseCp1x = midX + (this.baseTargetX > canvas.width/2 ? 40 : -40); 
+                this.cp1y = this.startY - (this.startY - this.baseTargetY) * 0.5;
+
+                this.stemColor = '#558b2f'; 
+
+                this.cacheCanvas = document.createElement('canvas');
+                this.cacheCanvas.width = this.size * 4.5; 
+                this.cacheCanvas.height = this.size * 4.5;
+                const cCtx = this.cacheCanvas.getContext('2d');
+                cCtx.translate(this.cacheCanvas.width / 2, this.cacheCanvas.height / 2);
+                
+                this.generateSpecificFlowerImage(cCtx);
+            }
+
+            generateSpecificFlowerImage(cCtx) {
+                cCtx.shadowBlur = 18;
+
+                if (this.flowerType === 0) {
+                    // MARGARITA BLANCA MEJORADA
+                    cCtx.shadowColor = 'rgba(255, 255, 255, 0.9)';
+                    cCtx.fillStyle = '#ffffff';
+                    const petals = 14;
+                    for (let i = 0; i < petals; i++) {
+                        cCtx.rotate((Math.PI * 2) / petals);
+                        cCtx.beginPath();
+                        cCtx.ellipse(0, -this.size * 0.75, this.size * 0.22, this.size * 0.75, 0, 0, Math.PI * 2);
+                        cCtx.fill();
+                    }
+                    cCtx.shadowBlur = 6;
+                    cCtx.fillStyle = '#ffb300';
+                    cCtx.beginPath(); cCtx.arc(0, 0, this.size * 0.38, 0, Math.PI*2); cCtx.fill();
+                    cCtx.fillStyle = '#ff8f00';
+                    for(let i=0; i<6; i++) {
+                        cCtx.beginPath(); cCtx.arc((Math.random()-0.5)*this.size*0.3, (Math.random()-0.5)*this.size*0.3, 1.5, 0, Math.PI*2); cCtx.fill();
+                    }
+                } 
+                else if (this.flowerType === 1) {
+                    // TULIPÁN REALISTA PULIDO
+                    cCtx.shadowColor = 'rgba(255, 120, 190, 0.95)';
+                    
+                    const drawTulipPetal = (gradColors, angle, scaleX, scaleY) => {
+                        cCtx.save();
+                        cCtx.rotate(angle);
+                        let grad = cCtx.createLinearGradient(0, 0, 0, -this.size * 1.4);
+                        grad.addColorStop(0, gradColors[0]); 
+                        grad.addColorStop(0.35, gradColors[1]); 
+                        grad.addColorStop(1, gradColors[2]); 
+                        
+                        cCtx.fillStyle = grad;
+                        cCtx.beginPath();
+                        cCtx.moveTo(0, this.size * 0.35);
+                        cCtx.bezierCurveTo(-this.size * scaleX, -this.size * 0.2, -this.size * scaleX * 1.15, -this.size * 1.2, 0, -this.size * 1.4);
+                        cCtx.bezierCurveTo(this.size * scaleX * 1.15, -this.size * 1.2, this.size * scaleX, -this.size * 0.2, 0, this.size * 0.35);
+                        cCtx.fill();
+                        cCtx.restore();
+                    };
+
+                    drawTulipPetal(['#fff0db', '#ff80bf', '#ff4da6'], -0.35, 0.48, 0.95);
+                    drawTulipPetal(['#fff0db', '#ff80bf', '#ff4da6'], 0.35, 0.48, 0.95);
+                    drawTulipPetal(['#fff9e6', '#ff66b2', '#ff1a8c'], 0, 0.52, 1.05);
+                    drawTulipPetal(['#ffffff', '#ff4da6', '#e60073'], -0.55, 0.58, 0.9);
+                    drawTulipPetal(['#ffffff', '#ff4da6', '#e60073'], 0.55, 0.58, 0.9);
+                }
+                else if (this.flowerType === 2) {
+                    // GIRASOL ELEGANTE
+                    cCtx.shadowColor = 'rgba(255, 190, 0, 0.9)';
+                    cCtx.fillStyle = '#ffca28';
+                    const petals = 18;
+                    for (let i = 0; i < petals; i++) {
+                        cCtx.rotate((Math.PI * 2) / petals);
+                        cCtx.beginPath();
+                        cCtx.moveTo(0, -this.size * 0.4);
+                        cCtx.lineTo(-this.size * 0.28, -this.size * 1.1);
+                        cCtx.lineTo(0, -this.size * 1.4);
+                        cCtx.lineTo(this.size * 0.28, -this.size * 1.1);
+                        cCtx.fill();
+                    }
+                    cCtx.shadowBlur = 3;
+                    cCtx.fillStyle = '#4e342e'; 
+                    cCtx.beginPath(); cCtx.arc(0, 0, this.size * 0.55, 0, Math.PI*2); cCtx.fill();
+                    cCtx.fillStyle = '#ffb300'; 
+                    cCtx.beginPath(); cCtx.arc(0, 0, this.size * 0.38, 0, Math.PI*2);
+                    cCtx.setLineDash([2, 3]); cCtx.lineWidth = 2.5; cCtx.strokeStyle = '#3e2723'; cCtx.stroke();
+                }
+                else if (this.flowerType === 3) {
+                    // NUBECITAS CON MÁXIMO VOLUMEN Y SUAVIDAD
+                    cCtx.shadowColor = 'rgba(255, 255, 255, 0.95)';
+                    cCtx.strokeStyle = '#7cb342';
+                    cCtx.lineWidth = 1.8;
+                    
+                    const cloudClusters = [
+                        {x: 0, y: 0, r: 20}, {x: -18, y: -14, r: 16}, {x: 18, y: -16, r: 16},
+                        {x: -30, y: 4, r: 14}, {x: 30, y: 6, r: 14}, {x: 0, y: -28, r: 17},
+                        {x: -12, y: -38, r: 14}, {x: 12, y: -36, r: 14}, {x: -25, y: -22, r: 12},
+                        {x: 25, y: -24, r: 12}, {x: 0, y: -14, r: 18}, {x: 0, y: -50, r: 10}
+                    ];
+
+                    cloudClusters.forEach(cluster => {
+                        cCtx.beginPath();
+                        cCtx.moveTo(0, 12);
+                        cCtx.lineTo(cluster.x, cluster.y);
+                        cCtx.stroke();
+
+                        cCtx.save();
+                        cCtx.translate(cluster.x, cluster.y);
+                        
+                        for (let k = 0; k < 7; k++) {
+                            let angle = (k / 7) * Math.PI * 2;
+                            let dist = cluster.r * 0.38;
+                            let px = Math.cos(angle) * dist;
+                            let py = Math.sin(angle) * dist;
+
+                            cCtx.fillStyle = '#ffffff';
+                            cCtx.beginPath();
+                            cCtx.arc(px, py, 5, 0, Math.PI * 2);
+                            cCtx.fill();
+                        }
+                        cCtx.fillStyle = '#ffffff';
+                        cCtx.beginPath(); cCtx.arc(0, 0, 7, 0, Math.PI*2); cCtx.fill();
+
+                        cCtx.fillStyle = '#fffde7';
+                        cCtx.beginPath(); cCtx.arc(0, 0, 3, 0, Math.PI*2); cCtx.fill();
+                        cCtx.restore();
+                    });
+                }
+            }
+
+            update(time) {
+                if (this.stemGrowth < 1) this.stemGrowth += 0.015;
+                else if (this.bloomGrowth < 1) this.bloomGrowth += 0.04;
+
+                const currentSway = Math.sin(time * this.swaySpeed + this.swayOffset) * this.swayAmount;
+                this.targetX = this.baseTargetX + currentSway;
+                this.cp1x = this.baseCp1x + (currentSway * 0.5); 
+            }
+
+            getPointOnBezier(t) {
+                const x = Math.pow(1-t, 2) * this.startX + 2 * (1-t) * t * this.cp1x + Math.pow(t, 2) * this.targetX;
+                const y = Math.pow(1-t, 2) * this.startY + 2 * (1-t) * t * this.cp1y + Math.pow(t, 2) * this.baseTargetY;
+                return {x, y};
+            }
+
+            draw() {
+                const currentPoint = this.getPointOnBezier(this.stemGrowth);
+                ctx.beginPath();
+                ctx.moveTo(this.startX, this.startY);
+                ctx.quadraticCurveTo(this.cp1x, this.cp1y, currentPoint.x, currentPoint.y);
+                ctx.strokeStyle = this.stemColor; 
+                ctx.lineWidth = 4.5;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+                
+                if (this.stemGrowth > 0.5) {
+                    const leafGrowth = Math.min(1, (this.stemGrowth - 0.5) * 2);
+                    
+                    const drawLeaf = (tPos, directionSign) => {
+                        if (this.stemGrowth > tPos) {
+                            const leafPos = this.getPointOnBezier(tPos);
+                            const tangentX = 2*(1-tPos)*(this.cp1x - this.startX) + 2*tPos*(this.targetX - this.cp1x);
+                            const tangentY = 2*(1-tPos)*(this.cp1y - this.startY) + 2*tPos*(this.baseTargetY - this.startY);
+                            const angle = Math.atan2(tangentY, tangentX);
+
+                            ctx.save();
+                            ctx.translate(leafPos.x, leafPos.y);
+                            ctx.rotate(angle + directionSign * (Math.PI / 4) + Math.PI/2); 
+                            ctx.scale(leafGrowth, leafGrowth);
+                            
+                            ctx.fillStyle = this.stemColor;
+                            ctx.beginPath();
+                            ctx.moveTo(0, 0); 
+                            ctx.quadraticCurveTo(10, -18, 0, -35); 
+                            ctx.quadraticCurveTo(-10, -18, 0, 0);
+                            ctx.fill();
+                            ctx.restore();
+                        }
+                    };
+
+                    drawLeaf(0.3, -1); 
+                    drawLeaf(0.5, 1);  
+                    drawLeaf(0.7, -1); 
+                }
+
+                if (this.stemGrowth >= 1 && this.bloomGrowth > 0) {
+                    ctx.save();
+                    ctx.translate(this.targetX, this.baseTargetY); 
+                    ctx.scale(this.bloomGrowth, this.bloomGrowth);
+                    ctx.drawImage(this.cacheCanvas, -this.cacheCanvas.width / 2, -this.cacheCanvas.height / 2);
+                    ctx.restore();
+                }
+            }
+        }
+
+        const flowers = [];
+        const MAX_FLOWERS = 6; 
+        let letterShown = false;
+        let lastFlowerType = -1;
+
+        function handlePlant(clientX, clientY) {
+            if (flowers.length >= MAX_FLOWERS) return; 
+            if (clientY > canvas.height - 80) return;
+
+            const minDistance = 75; 
+            let tooClose = false;
+
+            for (let flower of flowers) {
+                const dx = clientX - flower.baseTargetX;
+                const dy = clientY - flower.baseTargetY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < minDistance) {
+                    tooClose = true;
+                    break;
+                }
+            }
+
+            if (!tooClose) {
+                let newType;
+                do {
+                    newType = Math.floor(Math.random() * 4);
+                } while (newType === lastFlowerType);
+
+                lastFlowerType = newType;
+                flowers.push(new Flower(clientX, clientY, newType));
+
+                if (flowers.length === MAX_FLOWERS && !letterShown) {
+                    letterShown = true;
+                    setTimeout(() => {
+                        document.getElementById('letter-modal').classList.add('show');
+                    }, 1200); 
+                }
+            }
+        }
+
+        window.addEventListener('pointerdown', (e) => {
+            if (e.target.id === 'reset-btn' || e.target.id === 'close-letter' || e.target.id === 'music-btn') return;
+            handlePlant(e.clientX, e.clientY);
+        });
+
+        document.getElementById('close-letter').addEventListener('click', () => {
+            document.getElementById('letter-modal').classList.remove('show');
+        });
+
+        document.getElementById('reset-btn').addEventListener('pointerdown', (e) => {
+            e.stopPropagation(); 
+            flowers.length = 0; 
+            letterShown = false;
+            lastFlowerType = -1;
+            document.getElementById('letter-modal').classList.remove('show');
+        });
+
+        function animate(timestamp) {
+            drawBackground();
+            
+            flowers.forEach(flower => {
+                flower.update(timestamp);
+                flower.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>
