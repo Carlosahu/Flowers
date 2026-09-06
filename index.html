@@ -29,8 +29,51 @@
             cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(5px); z-index: 10;
         }
         .top-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: white; }
-        #music-btn { left: 20px; }
         #reset-btn { right: 20px; }
+
+        /* Contenedor del Mini Menú de Música */
+        #music-container {
+            position: absolute; top: 20px; left: 20px; z-index: 20;
+        }
+        #music-btn {
+            position: relative; top: 0; left: 0;
+        }
+        #song-menu {
+            display: none;
+            position: absolute;
+            top: 45px;
+            left: 0;
+            background: rgba(30, 15, 22, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 8px;
+            backdrop-filter: blur(8px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            width: 180px;
+        }
+        #song-menu.show {
+            display: block;
+        }
+        .song-option {
+            background: transparent;
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+            font-size: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .song-option:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .song-option.active {
+            color: #ff99cc;
+            font-weight: bold;
+        }
 
         /* Estilos Responsivos de la Carta Mágica */
         #letter-modal {
@@ -94,7 +137,16 @@
 <body>
 
     <div id="hint">✿ Toca la pantalla para armar tu ramo (6 flores) ✿</div>
-    <button id="music-btn" class="top-btn">🎵 Música: OFF</button>
+    
+    <div id="music-container">
+        <button id="music-btn" class="top-btn">🎵 Música: OFF</button>
+        <div id="song-menu">
+            <button class="song-option active" data-src="stargirl - ADTurnUp.mp3">🎶 Melodía 1 (Lluvia)</button>
+            <button class="song-option" data-src="https://actions.google.com/sounds/v1/ambiences/gentle_wind.ogg">🎶 Melodía 2 (Viento)</button>
+            <button class="song-option" data-src="https://actions.google.com/sounds/v1/ambiences/night_forest.ogg">🎶 Melodía 3 (Noche)</button>
+        </div>
+    </div>
+
     <button id="reset-btn" class="top-btn">Limpiar / Reset</button>
     
     <div id="letter-modal">
@@ -103,10 +155,7 @@
         <button id="close-letter">Cerrar carta</button>
     </div>
 
-    <audio id="bg-audio" loop>
-        <source src="Sammer x Khea - LLAMARTE REMIX (Video Oficial)(mp3j.cc).mp3" type="audio/ogg">
-        Tu navegador no soporta el elemento de audio.
-    </audio>
+    <audio id="bg-audio" loop></audio>
 
     <canvas id="canvas"></canvas>
 
@@ -121,27 +170,51 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // Control de Música Directo
+        // --- LÓGICA DEL MINI MENÚ DE MÚSICA ---
         let musicPlaying = false;
         const musicBtn = document.getElementById('music-btn');
+        const songMenu = document.getElementById('song-menu');
         const audio = document.getElementById('bg-audio');
-        
-        musicBtn.addEventListener('click', () => {
-            musicPlaying = !musicPlaying;
-            
-            if (musicPlaying) {
-                audio.play().then(() => {
-                    musicBtn.textContent = '🎵 Música: ON';
-                }).catch(error => {
-                    console.log("Error al reproducir audio:", error);
-                    musicPlaying = false;
-                });
-            } else {
-                audio.pause();
-                musicBtn.textContent = '🎵 Música: OFF';
-            }
+        const songOptions = document.querySelectorAll('.song-option');
+
+        // Canción por defecto (la primera de la lista)
+        let currentSongSrc = songOptions[0].getAttribute('data-src');
+        audio.src = currentSongSrc;
+
+        // Abrir/Cerrar menú al hacer clic en el botón de música
+        musicBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            songMenu.classList.toggle('show');
         });
 
+        // Cerrar el menú si se hace clic fuera de él
+        window.addEventListener('click', () => {
+            songMenu.classList.remove('show');
+        });
+
+        // Seleccionar canción del menú
+        songOptions.forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.stopPropagation();
+                songOptions.forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+
+                currentSongSrc = option.getAttribute('data-src');
+                audio.src = currentSongSrc;
+
+                if (musicPlaying) {
+                    audio.play().catch(err => console.log(err));
+                }
+
+                musicBtn.textContent = '🎵 Música: ON';
+                musicPlaying = true;
+                songMenu.classList.remove('show');
+            });
+        });
+
+        // Activar / Pausar audio principal con el botón (o puedes alternar)
+        // Nota: Si quieres un botón de play/pause directo, el menú se despliega para cambiar canciones.
+        
         // Partículas de polvo estelar sutiles
         const dustParticles = Array.from({ length: 50 }, () => ({
             x: Math.random() * window.innerWidth,
@@ -211,7 +284,6 @@
                 cCtx.shadowBlur = 18;
 
                 if (this.flowerType === 0) {
-                    // MARGARITA BLANCA MEJORADA
                     cCtx.shadowColor = 'rgba(255, 255, 255, 0.9)';
                     cCtx.fillStyle = '#ffffff';
                     const petals = 14;
@@ -230,9 +302,7 @@
                     }
                 } 
                 else if (this.flowerType === 1) {
-                    // TULIPÁN REALISTA PULIDO
                     cCtx.shadowColor = 'rgba(255, 120, 190, 0.95)';
-                    
                     const drawTulipPetal = (gradColors, angle, scaleX, scaleY) => {
                         cCtx.save();
                         cCtx.rotate(angle);
@@ -257,7 +327,6 @@
                     drawTulipPetal(['#ffffff', '#ff4da6', '#e60073'], 0.55, 0.58, 0.9);
                 }
                 else if (this.flowerType === 2) {
-                    // GIRASOL ELEGANTE
                     cCtx.shadowColor = 'rgba(255, 190, 0, 0.9)';
                     cCtx.fillStyle = '#ffca28';
                     const petals = 18;
@@ -278,7 +347,6 @@
                     cCtx.setLineDash([2, 3]); cCtx.lineWidth = 2.5; cCtx.strokeStyle = '#3e2723'; cCtx.stroke();
                 }
                 else if (this.flowerType === 3) {
-                    // NUBECITAS CON MÁXIMO VOLUMEN Y SUAVIDAD
                     cCtx.shadowColor = 'rgba(255, 255, 255, 0.95)';
                     cCtx.strokeStyle = '#7cb342';
                     cCtx.lineWidth = 1.8;
@@ -427,7 +495,7 @@
         }
 
         window.addEventListener('pointerdown', (e) => {
-            if (e.target.id === 'reset-btn' || e.target.id === 'close-letter' || e.target.id === 'music-btn') return;
+            if (e.target.closest('#music-container') || e.target.id === 'reset-btn' || e.target.id === 'close-letter') return;
             handlePlant(e.clientX, e.clientY);
         });
 
@@ -454,7 +522,7 @@
             requestAnimationFrame(animate);
         }
 
-        requestAnimationFrame(animate);
+        animate();
     </script>
 </body>
 </html>
