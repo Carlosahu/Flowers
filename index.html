@@ -43,13 +43,13 @@
             position: absolute;
             top: 45px;
             left: 0;
-            background: rgba(30, 15, 22, 0.9);
+            background: rgba(30, 15, 22, 0.95);
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 12px;
             padding: 8px;
             backdrop-filter: blur(8px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            width: 180px;
+            width: 200px;
         }
         #song-menu.show {
             display: block;
@@ -141,9 +141,9 @@
     <div id="music-container">
         <button id="music-btn" class="top-btn">🎵 Música: OFF</button>
         <div id="song-menu">
-            <button class="song-option active" data-src="stargirl - ADTurnUp.mp3">🎶 Melodía 1 (Lluvia)</button>
-            <button class="song-option" data-src="https://actions.google.com/sounds/v1/ambiences/gentle_wind.ogg">🎶 Melodía 2 (Viento)</button>
-            <button class="song-option" data-src="https://actions.google.com/sounds/v1/ambiences/night_forest.ogg">🎶 Melodía 3 (Noche)</button>
+            <button class="song-option active" data-src="stargirl - ADTurnUp.MP3"">🎶 Canción 1 (Ejemplo MP3)</button>
+            <button class="song-option" data-src="https://actions.google.com/sounds/v1/ambiences/rain_heavy.ogg">🎶 Canción 2 (Lluvia)</button>
+            <button class="song-option" data-src="https://actions.google.com/sounds/v1/ambiences/gentle_wind.ogg">🎶 Canción 3 (Viento)</button>
         </div>
     </div>
 
@@ -155,7 +155,7 @@
         <button id="close-letter">Cerrar carta</button>
     </div>
 
-    <audio id="bg-audio" loop></audio>
+    <audio id="bg-audio" preload="auto" loop></audio>
 
     <canvas id="canvas"></canvas>
 
@@ -170,14 +170,14 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // --- LÓGICA DEL MINI MENÚ DE MÚSICA ---
+        // --- LÓGICA DEL MINI MENÚ DE MÚSICA MP3 ---
         let musicPlaying = false;
         const musicBtn = document.getElementById('music-btn');
         const songMenu = document.getElementById('song-menu');
         const audio = document.getElementById('bg-audio');
         const songOptions = document.querySelectorAll('.song-option');
 
-        // Canción por defecto (la primera de la lista)
+        // Configurar la primera canción por defecto
         let currentSongSrc = songOptions[0].getAttribute('data-src');
         audio.src = currentSongSrc;
 
@@ -201,19 +201,21 @@
 
                 currentSongSrc = option.getAttribute('data-src');
                 audio.src = currentSongSrc;
+                
+                // Forzar reproducción inmediata al cambiar de canción
+                audio.play().then(() => {
+                    musicPlaying = true;
+                    musicBtn.textContent = '🎵 Música: ON';
+                }).catch(err => {
+                    console.log("Error al reproducir audio:", err);
+                });
 
-                if (musicPlaying) {
-                    audio.play().catch(err => console.log(err));
-                }
-
-                musicBtn.textContent = '🎵 Música: ON';
-                musicPlaying = true;
                 songMenu.classList.remove('show');
             });
         });
 
-        // Activar / Pausar audio principal con el botón (o puedes alternar)
-        // Nota: Si quieres un botón de play/pause directo, el menú se despliega para cambiar canciones.
+        // Permitir alternar ON/OFF tocando el botón principal si ya hay una canción seleccionada
+        // (Opcional: puedes usar el menú para alternar, pero esto da control rápido)
         
         // Partículas de polvo estelar sutiles
         const dustParticles = Array.from({ length: 50 }, () => ({
@@ -522,7 +524,7 @@
             requestAnimationFrame(animate);
         }
 
-        animate();
+        requestAnimationFrame(animate);
     </script>
 </body>
 </html>
