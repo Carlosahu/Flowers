@@ -31,10 +31,10 @@
         .top-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: white; }
         #reset-btn { right: 20px; }
 
-        /* Contenedor del Mini Menú de Música */
+        /* Contenedor del Mini Menú de Música con espacio separado */
         #music-container {
             position: absolute; top: 20px; left: 20px; z-index: 20;
-            display: flex; gap: 8px;
+            display: flex; gap: 12px;
         }
         #song-menu {
             display: none;
@@ -144,12 +144,13 @@
 
     <div id="hint">✿ Toca la pantalla para armar tu ramo (6 flores) ✿</div>
     
+    <!-- Mini Menú de Música con separación ajustada -->
     <div id="music-container">
-        <button id="music-btn" class="top-btn">🎵 Música: OFF</button>
+        <button id="music-btn" class="top-btn" style="position: relative; left: 0; top: 0;">🎵 Música: OFF</button>
         <button id="menu-toggle-btn">▼</button>
         <div id="song-menu">
             <button class="song-option active" data-src="stargirl - ADTurnUp.mp3">🎶 Canción 1: Stargirl</button>
-            <button class="song-option" data-src="Racing Mind - Lovely Girl.mp3">🎶 Canción 2 (Lluvia)</button>
+            <button class="song-option" data-src="https://actions.google.com/sounds/v1/ambiences/rain_heavy.ogg">🎶 Canción 2 (Lluvia)</button>
             <button class="song-option" data-src="https://actions.google.com/sounds/v1/ambiences/gentle_wind.ogg">🎶 Canción 3 (Viento)</button>
         </div>
     </div>
@@ -177,7 +178,6 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // --- LÓGICA DE REPRODUCCIÓN Y PAUSA ---
         let musicPlaying = false;
         const musicBtn = document.getElementById('music-btn');
         const menuToggleBtn = document.getElementById('menu-toggle-btn');
@@ -185,11 +185,9 @@
         const audio = document.getElementById('bg-audio');
         const songOptions = document.querySelectorAll('.song-option');
 
-        // Configurar la primera canción por defecto al iniciar
         let currentSongSrc = songOptions[0].getAttribute('data-src');
         audio.src = currentSongSrc;
 
-        // Botón principal: Alternar entre Reproducir y Pausar
         musicBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             songMenu.classList.remove('show');
@@ -209,18 +207,15 @@
             }
         });
 
-        // Botón flecha: Desplegar el menú de canciones
         menuToggleBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             songMenu.classList.toggle('show');
         });
 
-        // Cerrar el menú si se hace clic fuera de él
         window.addEventListener('click', () => {
             songMenu.classList.remove('show');
         });
 
-        // Seleccionar canción del menú desplegable
         songOptions.forEach(option => {
             option.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -230,7 +225,6 @@
                 currentSongSrc = option.getAttribute('data-src');
                 audio.src = currentSongSrc;
                 
-                // Reproducir automáticamente la nueva canción seleccionada
                 audio.play().then(() => {
                     musicPlaying = true;
                     musicBtn.textContent = '🎵 Música: ON';
@@ -242,7 +236,6 @@
             });
         });
 
-        // Partículas de polvo estelar sutiles
         const dustParticles = Array.from({ length: 50 }, () => ({
             x: Math.random() * window.innerWidth,
             y: Math.random() * window.innerHeight,
