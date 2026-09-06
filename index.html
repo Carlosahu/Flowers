@@ -7,13 +7,14 @@
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow: hidden; background: radial-gradient(circle at center, #2a1420 0%, #12090e 100%);
+            overflow-x: hidden; /* Evita movimiento lateral indeseado */
+            background: radial-gradient(circle at center, #2a1420 0%, #12090e 100%);
             font-family: 'Courier New', Courier, monospace;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
         }
-        canvas { display: block; width: 100%; height: 100%; }
+        canvas { display: block; width: 100%; height: 100%; position: fixed; top: 0; left: 0; z-index: 1; }
         #hint {
             position: absolute; top: 60px; width: 100%; text-align: center;
             color: rgba(255, 255, 255, 0.7); font-size: 15px; pointer-events: none;
@@ -21,7 +22,6 @@
             z-index: 5; padding: 0 15px; box-sizing: border-box;
         }
         
-        /* Botones superiores */
         .top-btn {
             position: absolute; top: 20px;
             background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.3);
@@ -31,7 +31,6 @@
         .top-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: white; }
         #reset-btn { right: 20px; }
 
-        /* Contenedor del Mini Menú de Música con espacio separado */
         #music-container {
             position: absolute; top: 20px; left: 20px; z-index: 20;
             display: flex; gap: 12px;
@@ -75,7 +74,6 @@
             font-weight: bold;
         }
 
-        /* Botón desplegable del menú de canciones */
         #menu-toggle-btn {
             background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.3);
             color: white; padding: 8px 12px; border-radius: 20px; font-family: inherit; font-size: 12px;
@@ -83,79 +81,99 @@
         }
         #menu-toggle-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: white; }
 
-        /* Estilos Responsivos de la Carta Mágica (Más grande y centrada) */
+        /* --- CORRECCIÓN AQUÍ: SCROLL TOTAL --- */
         #letter-modal {
             position: absolute;
-            top: 50%;
+            /* Ya no usamos top: 50%. Fijamos la carta a una distancia segura del borde superior */
+            top: 60px; 
             left: 50%;
-            transform: translate(-50%, -50%) scale(0);
+            /* Solo la centramos horizontalmente */
+            transform: translateX(-50%) scale(0);
             width: 90%;
             max-width: 450px;
-            max-height: 100vh;
+            /* La altura máxima deja que el navegador decida, pero no más del 85% de la pantalla */
+            max-height: 85vh; 
             background: #fff9f0;
             border: 2px solid #e6ccb2;
-            padding: 30px;
+            padding: 25px;
             box-shadow: 0 15px 50px rgba(0,0,0,0.7);
             border-radius: 16px;
             text-align: center;
             z-index: 100;
             opacity: 0;
-            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             pointer-events: none;
             box-sizing: border-box;
+            /* Usamos flexbox para ordenar Título - Texto - Botón */
             display: flex;
             flex-direction: column;
+            /* Importante: Esto habilita el scroll DENTRO de la carta si el texto es largo */
+            overflow: hidden; 
+            /* Un poco de margen abajo para que el botón no toque el borde */
+            margin-bottom: 40px; 
         }
 
         #letter-modal.show {
-            transform: translate(-50%, -50%) scale(1);
+            transform: translateX(-50%) scale(1);
             opacity: 1;
             pointer-events: auto;
         }
 
         #letter-modal h2 {
             color: #593340;
-            margin: 0 0 20px 0;
+            margin: 0 0 15px 0;
             font-family: serif;
             letter-spacing: 1px;
-            font-size: 24px;
-            flex-shrink: 0;
+            font-size: 22px;
+            /* El título no debe cambiar de tamaño */
+            flex-shrink: 0; 
         }
 
-        /* Contenedor del texto con scroll y centrado */
+        /* Contenedor del texto con scroll propio */
         #letter-text-container {
-            overflow-y: auto;
-            flex-grow: 1;
-            padding-right: 5px;
-            margin-bottom: 25px;
+            flex-grow: 1; /* Ocupa todo el espacio disponible entre el título y el botón */
+            overflow-y: auto; /* Habilita la barra de desplazamiento aquí */
+            padding-right: 10px; /* Espacio para que el scroll no tape el texto */
+            margin-bottom: 15px;
             text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            
+            /* Estilizado opcional de la barra de scroll para navegadores modernos */
+            scrollbar-width: thin;
+            scrollbar-color: #e6ccb2 #fff9f0;
+        }
+        
+        /* Estilizado para Chrome/Safari/Edge */
+        #letter-text-container::-webkit-scrollbar {
+            width: 8px;
+        }
+        #letter-text-container::-webkit-scrollbar-track {
+            background: #fff9f0;
+        }
+        #letter-text-container::-webkit-scrollbar-thumb {
+            background: #e6ccb2;
+            border-radius: 4px;
         }
 
         #letter-modal p {
             color: #4a3b40;
-            font-size: 15px;
-            line-height: 1.8;
+            font-size: 14px;
+            line-height: 1.6;
             margin: 0;
-            padding: 0 10px;
-            text-align: center;
+            text-align: center; /* Asegura el texto centrado */
         }
 
         #close-letter {
             background: #b85c74;
             border: none;
             color: white;
-            padding: 12px 30px;
+            padding: 10px 24px;
             border-radius: 20px;
             font-family: inherit;
             font-size: 14px;
             cursor: pointer;
             transition: background 0.3s;
-            align-self: center;
+            align-self: center; /* Mantiene el botón centrado abajo */
             flex-shrink: 0;
-            margin-top: auto;
         }
 
         #close-letter:hover {
