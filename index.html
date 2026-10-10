@@ -7,14 +7,124 @@
     <style>
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
-            overflow-x: hidden; /* Evita movimiento lateral indeseado */
+            overflow-x: hidden;
             background: radial-gradient(circle at center, #2a1420 0%, #12090e 100%);
             font-family: 'Courier New', Courier, monospace;
             -webkit-touch-callout: none;
             -webkit-user-select: none;
             user-select: none;
         }
-        canvas { display: block; width: 100%; height: 100%; position: fixed; top: 0; left: 0; z-index: 1; }
+        canvas#canvas { display: block; width: 100%; height: 100%; position: fixed; top: 0; left: 0; z-index: 1; }
+        
+        /* Intro Overlay Transparente */
+        #intro-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.45); /* Fondo semi-transparente para ver las estrellas de fondo */
+            backdrop-filter: blur(2px);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            transition: opacity 1s ease, visibility 1s ease;
+        }
+        #intro-overlay.fade-out {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        #heartCanvas {
+            display: block;
+            background: transparent;
+        }
+        #skip-intro {
+            position: absolute;
+            bottom: 25px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: #fff;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-family: inherit;
+            font-size: 13px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: background 0.3s;
+            z-index: 1001;
+        }
+        #skip-intro:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* Panel Secreto de Configuración del Corazón */
+        #secret-heart-menu {
+            display: none;
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(20, 10, 15, 0.95);
+            border: 1px solid rgba(255, 182, 193, 0.4);
+            box-shadow: 0 0 25px rgba(255, 105, 180, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            width: 310px;
+            color: #fff;
+            z-index: 2000;
+            backdrop-filter: blur(10px);
+            font-size: 13px;
+        }
+        #secret-heart-menu.show {
+            display: block;
+        }
+        #secret-heart-menu h3 {
+            margin: 0 0 12px 0;
+            color: #ffb6c1;
+            font-size: 16px;
+            text-align: center;
+        }
+        .secret-field {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .secret-field label {
+            font-size: 11px;
+            color: #ddd;
+        }
+        .secret-field input {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            color: #fff;
+            padding: 4px 8px;
+            width: 130px;
+            text-align: right;
+            font-family: inherit;
+        }
+        .secret-field input[type="color"] {
+            padding: 0;
+            height: 25px;
+            width: 40px;
+            cursor: pointer;
+        }
+        #apply-heart-config {
+            width: 100%;
+            background: #ff7597;
+            border: none;
+            color: white;
+            padding: 8px;
+            border-radius: 10px;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        #apply-heart-config:hover {
+            background: #ff4f7b;
+        }
+
         #hint {
             position: absolute; top: 60px; width: 100%; text-align: center;
             color: rgba(255, 255, 255, 0.7); font-size: 15px; pointer-events: none;
@@ -35,6 +145,15 @@
             position: absolute; top: 20px; left: 20px; z-index: 20;
             display: flex; gap: 12px;
         }
+        
+        #menu-toggle-btn {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white; padding: 8px 12px; border-radius: 20px; font-family: inherit; font-size: 12px;
+            cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(5px);
+        }
+        #menu-toggle-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: white; }
+
         #song-menu {
             display: none;
             position: absolute;
@@ -50,153 +169,112 @@
             max-height: 200px;
             overflow-y: auto;
         }
-        #song-menu.show {
-            display: block;
-        }
+        #song-menu.show { display: block; }
         .song-option {
-            background: transparent;
-            border: none;
-            color: white;
-            padding: 8px 12px;
-            width: 100%;
-            text-align: left;
-            font-family: inherit;
-            font-size: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: background 0.2s;
+            background: transparent; border: none; color: white;
+            padding: 8px 12px; width: 100%; text-align: left;
+            font-family: inherit; font-size: 12px; border-radius: 8px;
+            cursor: pointer; transition: background 0.2s;
         }
-        .song-option:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-        .song-option.active {
-            color: #ff99cc;
-            font-weight: bold;
-        }
+        .song-option:hover { background: rgba(255, 255, 255, 0.15); }
+        .song-option.active { color: #ff99cc; font-weight: bold; }
 
-        #menu-toggle-btn {
-            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white; padding: 8px 12px; border-radius: 20px; font-family: inherit; font-size: 12px;
-            cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(5px);
-        }
-        #menu-toggle-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: white; }
-
-        /* --- CORRECCIÓN AQUÍ: SCROLL TOTAL --- */
         #letter-modal {
             position: absolute;
-            /* Ya no usamos top: 50%. Fijamos la carta a una distancia segura del borde superior */
-            top: 60px; 
-            left: 50%;
-            /* Solo la centramos horizontalmente */
+            top: 60px; left: 50%;
             transform: translateX(-50%) scale(0);
-            width: 90%;
-            max-width: 450px;
-            /* La altura máxima deja que el navegador decida, pero no más del 85% de la pantalla */
-            max-height: 85vh; 
-            background: #fff9f0;
-            border: 2px solid #e6ccb2;
-            padding: 25px;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.7);
-            border-radius: 16px;
-            text-align: center;
-            z-index: 100;
-            opacity: 0;
+            width: 90%; max-width: 450px; max-height: 85vh; 
+            background: #fff9f0; border: 2px solid #e6ccb2;
+            padding: 25px; box-shadow: 0 15px 50px rgba(0,0,0,0.7);
+            border-radius: 16px; text-align: center;
+            z-index: 100; opacity: 0;
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            pointer-events: none;
-            box-sizing: border-box;
-            /* Usamos flexbox para ordenar Título - Texto - Botón */
-            display: flex;
-            flex-direction: column;
-            /* Importante: Esto habilita el scroll DENTRO de la carta si el texto es largo */
-            overflow: hidden; 
-            /* Un poco de margen abajo para que el botón no toque el borde */
-            margin-bottom: 40px; 
+            pointer-events: none; box-sizing: border-box;
+            display: flex; flex-direction: column; overflow: hidden; margin-bottom: 40px; 
         }
 
         #letter-modal.show {
             transform: translateX(-50%) scale(1);
-            opacity: 1;
-            pointer-events: auto;
+            opacity: 1; pointer-events: auto;
         }
 
         #letter-modal h2 {
-            color: #593340;
-            margin: 0 0 15px 0;
-            font-family: serif;
-            letter-spacing: 1px;
-            font-size: 22px;
-            /* El título no debe cambiar de tamaño */
-            flex-shrink: 0; 
+            color: #593340; margin: 0 0 15px 0; font-family: serif;
+            letter-spacing: 1px; font-size: 22px; flex-shrink: 0; 
         }
 
-        /* Contenedor del texto con scroll propio */
         #letter-text-container {
-            flex-grow: 1; /* Ocupa todo el espacio disponible entre el título y el botón */
-            overflow-y: auto; /* Habilita la barra de desplazamiento aquí */
-            padding-right: 10px; /* Espacio para que el scroll no tape el texto */
-            margin-bottom: 15px;
-            text-align: center;
-            
-            /* Estilizado opcional de la barra de scroll para navegadores modernos */
-            scrollbar-width: thin;
-            scrollbar-color: #e6ccb2 #fff9f0;
+            flex-grow: 1; overflow-y: auto; padding-right: 10px;
+            margin-bottom: 15px; text-align: center;
+            scrollbar-width: thin; scrollbar-color: #e6ccb2 #fff9f0;
         }
         
-        /* Estilizado para Chrome/Safari/Edge */
-        #letter-text-container::-webkit-scrollbar {
-            width: 8px;
-        }
-        #letter-text-container::-webkit-scrollbar-track {
-            background: #fff9f0;
-        }
-        #letter-text-container::-webkit-scrollbar-thumb {
-            background: #e6ccb2;
-            border-radius: 4px;
-        }
+        #letter-text-container::-webkit-scrollbar { width: 8px; }
+        #letter-text-container::-webkit-scrollbar-track { background: #fff9f0; }
+        #letter-text-container::-webkit-scrollbar-thumb { background: #e6ccb2; border-radius: 4px; }
 
         #letter-modal p {
-            color: #4a3b40;
-            font-size: 14px;
-            line-height: 1.6;
-            margin: 0;
-            text-align: center; /* Asegura el texto centrado */
+            color: #4a3b40; font-size: 14px; line-height: 1.6; margin: 0; text-align: center;
         }
 
         #close-letter {
-            background: #b85c74;
-            border: none;
-            color: white;
-            padding: 10px 24px;
-            border-radius: 20px;
-            font-family: inherit;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background 0.3s;
-            align-self: center; /* Mantiene el botón centrado abajo */
-            flex-shrink: 0;
+            background: #b85c74; border: none; color: white;
+            padding: 10px 24px; border-radius: 20px; font-family: inherit;
+            font-size: 14px; cursor: pointer; transition: background 0.3s;
+            align-self: center; flex-shrink: 0;
         }
-
-        #close-letter:hover {
-            background: #994a5e;
-        }
+        #close-letter:hover { background: #994a5e; }
     </style>
 </head>
 <body>
 
+    <!-- Overlay Transparente de la Intro -->
+    <div id="intro-overlay">
+        <canvas id="heartCanvas"></canvas>
+        <button id="skip-intro">Saltar Intro ➔</button>
+    </div>
+
+    <!-- Menú Secreto de Configuración del Corazón (Ctrl + Shift + H) -->
+    <div id="secret-heart-menu">
+        <h3>⚙️ Parámetros Corazón</h3>
+        <div class="secret-field">
+            <label>Texto:</label>
+            <input type="text" id="cfg-text" value="I love you">
+        </div>
+        <div class="secret-field">
+            <label>Color:</label>
+            <input type="color" id="cfg-color" value="#ffb6c1">
+        </div>
+        <div class="secret-field">
+            <label>Escala Inicial:</label>
+            <input type="number" id="cfg-scale-start" value="11" min="1" max="20">
+        </div>
+        <div class="secret-field">
+            <label>Escala Final:</label>
+            <input type="number" id="cfg-scale-end" value="16" min="2" max="30">
+        </div>
+        <div class="secret-field">
+            <label>Velocidad (ms):</label>
+            <input type="number" id="cfg-speed" value="15" min="1" max="100">
+        </div>
+        <div class="secret-field">
+            <label>Fuente:</label>
+            <input type="text" id="cfg-font" value="Arial">
+        </div>
+        <button id="apply-heart-config">Reiniciar Animación</button>
+    </div>
+
     <div id="hint">✿ Toca la pantalla para colocar flores ✿</div>
     
-    <!-- Mini Menú de Música con separación ajustada -->
     <div id="music-container">
         <button id="music-btn" class="top-btn" style="position: relative; left: 0; top: 0;">🎵 Música: OFF</button>
-        <button id="menu-toggle-btn"> mas canciones ▼</button>
+        <button id="menu-toggle-btn">más canciones ▼</button>
         <div id="song-menu">
-            <button class="song-option active" data-src="Racing Mind - Lovely Girl.mp3">🎶  Lovely Girl</button>
+            <button class="song-option active" data-src="Racing Mind - Lovely Girl.mp3">🎶 Lovely Girl</button>
             <button class="song-option" data-src="Joe Hisaishi - Merry-Go-Round of Life (from “Howl’s Moving Castle”)(mp3j.cc).mp3">🎶 Merry-Go-Round of Life</button>
             <button class="song-option" data-src="stargirl - ADTurnUp.mp3">🎶 Stargirl</button>
             <button class="song-option" data-src="our taste(mp3j.cc).mp3">🎶 our taste</button>
             <button class="song-option" data-src="Yachin ga Hanbun!(mp3j.cc).mp3">🎶 Yachin ga Hanbun!</button>
-            <button class="song-option" data-src="our taste(mp3j.cc).mp3">🎶 our taste</button>
-            
         </div>
     </div>
 
@@ -204,8 +282,8 @@
     
     <div id="letter-modal">
         <h2>Hola Corazon 💗</h2>
-        <div id="letter-text-container"
-            <p>Has cultivado un hermoso ramito de flores.<br> Wao un mesesito ya como novios no se como se haga jsjs haci que Feliz Primer Mes corazoon anque no sea la gran cosa este es un detallito que esta echo con muchisimo cariño y amor para recordarte cuanto te amo ya que desde que te conoci incluso antes de conocerte solo con verte una vez supe que tenias algo que me encanto  ese algo hizo que me llamaras la atencion muy rapido y al conocerte supe lo increible que eres es y tu te hiciste cargo de que con esa atraccion me enamorara de ti y luego cada vez mas hasta este punto que amo todo de ti desde como te mira,tu cabello tu sonrisa TUS OJOS tu manera de vestir , hasta como hablas te expresas respiras,haci como los pequeños detalles que tienes conmigo cualquier cosita que me regales yo aprecio mucho eso,Amo La Gran e infinita paciencia que me tienes porque dios corazon me tienes una paciencia que no se de donde sacas tanta,Amo el tiempo que paso contigo haci san una dos tres horas incluso 5 minutos,Anque se que no soy ni de cerca el mejor novio gracias a ti e mejorado bastante <br><br> Te Amo Demasiado Mi amor no tienes idea cuanto 💗💗 <br><br> por cierto Buenos dias mi ñina hermosa descansaste?, que tengas un excelente dia suerte en tu trabajo Besitoos 💗💗.</p>
+        <div id="letter-text-container">
+            <p>Has cultivado un hermoso ramito de flores.<br> Wao un mesesito ya como novios no se como se haga jsjs haci que Feliz Primer Mes corazoon anque no sea la gran cosa este es un detallito que esta echo con muchisimo cariño y amor para recordarte cuanto te amo ya que desde que te conoci incluso antes de conocerte solo con verte una vez supe que tenias algo que me encanto ese algo hizo que me llamaras la atencion muy rapido y al conocerte supe lo increible que eres es y tu te hiciste cargo de que con esa atraccion me enamorara de ti y luego cada vez mas hasta este punto que amo todo de ti desde como te mira,tu cabello tu sonrisa TUS OJOS tu manera de vestir , hasta como hablas te expresas respiras,haci como los pequeños detalles que tienes conmigo cualquier cosita que me regales yo aprecio mucho eso,Amo La Gran e infinita paciencia que me tienes porque dios corazon me tienes una paciencia que no se de donde sacas tanta,Amo el tiempo que paso contigo haci san una dos tres horas incluso 5 minutos,Anque se que no soy ni de cerca el mejor novio gracias a ti e mejorado bastante <br><br> Te Amo Demasiado Mi amor no tienes idea cuanto 💗💗 <br><br> por cierto Buenos dias mi ñina hermosa descansaste?, que tengas un excelente dia suerte en tu trabajo Besitoos 💗💗.</p>
         </div>
         <button id="close-letter">Cerrar carta</button>
     </div>
@@ -215,6 +293,112 @@
     <canvas id="canvas"></canvas>
 
     <script>
+        // --- CONFIGURACIÓN Y ANIMACIÓN DEL CORAZÓN ---
+        const hCanvas = document.getElementById('heartCanvas');
+        const hCtx = hCanvas.getContext('2d');
+        const introOverlay = document.getElementById('intro-overlay');
+        const skipBtn = document.getElementById('skip-intro');
+
+        let heartConfig = {
+            text: "I love you",
+            color: "#ffb6c1",
+            scaleStart: 11,
+            scaleEnd: 16,
+            speed: 15,
+            font: "Arial"
+        };
+
+        function resizeHeartCanvas() {
+            hCanvas.width = Math.min(window.innerWidth, 500);
+            hCanvas.height = Math.min(window.innerHeight, 500);
+        }
+        resizeHeartCanvas();
+
+        let scale = heartConfig.scaleStart;
+        let i = 0;
+        let heartTimer = null;
+        let autoDismissTimer = null;
+
+        function drawHeartStep() {
+            if (scale >= heartConfig.scaleEnd) {
+                clearInterval(heartTimer);
+                return;
+            }
+
+            const angle = i * (Math.PI * 2) / 120;
+            const x = 16 * Math.pow(Math.sin(angle), 3) * scale;
+            const y = (13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle)) * scale;
+
+            const canvasX = hCanvas.width / 2 + x;
+            const canvasY = hCanvas.height / 2 - y;
+
+            hCtx.font = `bold 9px ${heartConfig.font}`;
+            hCtx.fillStyle = heartConfig.color;
+            hCtx.textAlign = "center";
+            hCtx.fillText(heartConfig.text, canvasX, canvasY);
+
+            i++;
+            if (i >= 120) {
+                i = 0;
+                scale++;
+            }
+        }
+
+        function startHeartAnimation() {
+            clearInterval(heartTimer);
+            clearTimeout(autoDismissTimer);
+            hCtx.clearRect(0, 0, hCanvas.width, hCanvas.height);
+            
+            scale = parseInt(heartConfig.scaleStart);
+            i = 0;
+            
+            introOverlay.style.display = 'flex';
+            introOverlay.classList.remove('fade-out');
+
+            heartTimer = setInterval(drawHeartStep, parseInt(heartConfig.speed));
+
+            // Duración calculada para ocultar automáticamente al finalizar
+            const totalSteps = (heartConfig.scaleEnd - heartConfig.scaleStart) * 120;
+            const totalDuration = totalSteps * heartConfig.speed + 1500;
+            autoDismissTimer = setTimeout(dismissIntro, Math.max(totalDuration, 5000));
+        }
+
+        function dismissIntro() {
+            clearInterval(heartTimer);
+            clearTimeout(autoDismissTimer);
+            introOverlay.classList.add('fade-out');
+            setTimeout(() => {
+                introOverlay.style.display = 'none';
+            }, 1000);
+        }
+
+        skipBtn.addEventListener('click', dismissIntro);
+        startHeartAnimation();
+
+        // --- ATALAYA SECRETA PARA EL MENÚ DEL CORAZÓN (Ctrl + Shift + H / Cmd + Shift + H) ---
+        const secretMenu = document.getElementById('secret-heart-menu');
+        const applyBtn = document.getElementById('apply-heart-config');
+
+        window.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'h') {
+                e.preventDefault();
+                secretMenu.classList.toggle('show');
+            }
+        });
+
+        applyBtn.addEventListener('click', () => {
+            heartConfig.text = document.getElementById('cfg-text').value;
+            heartConfig.color = document.getElementById('cfg-color').value;
+            heartConfig.scaleStart = parseInt(document.getElementById('cfg-scale-start').value);
+            heartConfig.scaleEnd = parseInt(document.getElementById('cfg-scale-end').value);
+            heartConfig.speed = parseInt(document.getElementById('cfg-speed').value);
+            heartConfig.font = document.getElementById('cfg-font').value;
+
+            secretMenu.classList.remove('show');
+            startHeartAnimation();
+        });
+
+        // --- LÓGICA DEL JARDÍN DE FLORES ---
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d', { alpha: false }); 
 
@@ -222,12 +406,13 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         }
-        window.addEventListener('resize', resize);
+        window.addEventListener('resize', () => {
+            resize();
+            resizeHeartCanvas();
+        });
         
-        // Prevención de bugs de renderizado inicial en móviles
         resize();
         setTimeout(resize, 100);
-        setTimeout(resize, 500);
 
         let musicPlaying = false;
         const musicBtn = document.getElementById('music-btn');
@@ -263,8 +448,10 @@
             songMenu.classList.toggle('show');
         });
 
-        window.addEventListener('click', () => {
-            songMenu.classList.remove('show');
+        window.addEventListener('click', (e) => {
+            if (!e.target.closest('#secret-heart-menu')) {
+                songMenu.classList.remove('show');
+            }
         });
 
         songOptions.forEach(option => {
@@ -566,7 +753,7 @@
         }
 
         window.addEventListener('pointerdown', (e) => {
-            if (e.target.closest('#music-container') || e.target.id === 'reset-btn' || e.target.id === 'close-letter' || e.target.closest('#letter-modal')) return;
+            if (e.target.closest('#music-container') || e.target.id === 'reset-btn' || e.target.id === 'close-letter' || e.target.closest('#letter-modal') || e.target.closest('#intro-overlay') || e.target.closest('#secret-heart-menu')) return;
             handlePlant(e.clientX, e.clientY);
         });
 
