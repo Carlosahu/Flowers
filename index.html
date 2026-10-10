@@ -16,11 +16,11 @@
         }
         canvas#canvas { display: block; width: 100%; height: 100%; position: fixed; top: 0; left: 0; z-index: 1; }
         
-        /* Intro Overlay Transparente */
+        /* Overlay Transparente de la Intro */
         #intro-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.45); /* Fondo semi-transparente para ver las estrellas de fondo */
+            background: rgba(0, 0, 0, 0.45);
             backdrop-filter: blur(2px);
             z-index: 1000;
             display: flex;
@@ -258,6 +258,10 @@
             <input type="number" id="cfg-speed" value="15" min="1" max="100">
         </div>
         <div class="secret-field">
+            <label>Delay Inicio (ms):</label>
+            <input type="number" id="cfg-delay" value="1000" min="0" max="5000">
+        </div>
+        <div class="secret-field">
             <label>Fuente:</label>
             <input type="text" id="cfg-font" value="Arial">
         </div>
@@ -308,6 +312,8 @@
             font: "Arial"
         };
 
+        let heartStartDelay = 1000; // Delay inicial en milisegundos
+
         function resizeHeartCanvas() {
             hCanvas.width = Math.min(window.innerWidth, 500);
             hCanvas.height = Math.min(window.innerHeight, 500);
@@ -318,6 +324,7 @@
         let i = 0;
         let heartTimer = null;
         let autoDismissTimer = null;
+        let delayTimer = null;
 
         function drawHeartStep() {
             if (scale >= heartConfig.scaleEnd) {
@@ -347,6 +354,8 @@
         function startHeartAnimation() {
             clearInterval(heartTimer);
             clearTimeout(autoDismissTimer);
+            clearTimeout(delayTimer);
+            
             hCtx.clearRect(0, 0, hCanvas.width, hCanvas.height);
             
             scale = parseInt(heartConfig.scaleStart);
@@ -355,17 +364,20 @@
             introOverlay.style.display = 'flex';
             introOverlay.classList.remove('fade-out');
 
-            heartTimer = setInterval(drawHeartStep, parseInt(heartConfig.speed));
+            // Retraso programado antes de iniciar la iteración de dibujo
+            delayTimer = setTimeout(() => {
+                heartTimer = setInterval(drawHeartStep, parseInt(heartConfig.speed));
 
-            // Duración calculada para ocultar automáticamente al finalizar
-            const totalSteps = (heartConfig.scaleEnd - heartConfig.scaleStart) * 120;
-            const totalDuration = totalSteps * heartConfig.speed + 1500;
-            autoDismissTimer = setTimeout(dismissIntro, Math.max(totalDuration, 5000));
+                const totalSteps = (heartConfig.scaleEnd - heartConfig.scaleStart) * 120;
+                const totalDuration = (totalSteps * heartConfig.speed) + 1500;
+                autoDismissTimer = setTimeout(dismissIntro, Math.max(totalDuration, 5000));
+            }, heartStartDelay);
         }
 
         function dismissIntro() {
             clearInterval(heartTimer);
             clearTimeout(autoDismissTimer);
+            clearTimeout(delayTimer);
             introOverlay.classList.add('fade-out');
             setTimeout(() => {
                 introOverlay.style.display = 'none';
@@ -375,7 +387,7 @@
         skipBtn.addEventListener('click', dismissIntro);
         startHeartAnimation();
 
-        // --- ATALAYA SECRETA PARA EL MENÚ DEL CORAZÓN (Ctrl + Shift + H / Cmd + Shift + H) ---
+        // --- MENÚ SECRETO PARA PARÁMETROS DEL CORAZÓN (Ctrl + Shift + H / Cmd + Shift + H) ---
         const secretMenu = document.getElementById('secret-heart-menu');
         const applyBtn = document.getElementById('apply-heart-config');
 
@@ -393,6 +405,8 @@
             heartConfig.scaleEnd = parseInt(document.getElementById('cfg-scale-end').value);
             heartConfig.speed = parseInt(document.getElementById('cfg-speed').value);
             heartConfig.font = document.getElementById('cfg-font').value;
+            
+            heartStartDelay = parseInt(document.getElementById('cfg-delay').value) || 0;
 
             secretMenu.classList.remove('show');
             startHeartAnimation();
