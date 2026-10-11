@@ -151,7 +151,7 @@
             z-index: 5; padding: 0 15px; box-sizing: border-box;
         }
         
-        /* BARRA SUPERIOR AJUSTADA */
+        /* BARRA SUPERIOR DE BOTONES */
         #top-bar {
             position: absolute;
             top: 12px;
@@ -189,33 +189,52 @@
             justify-content: center;
             box-sizing: border-box;
             height: 28px;
+            touch-action: manipulation;
         }
         .top-btn:hover { background: rgba(255, 255, 255, 0.25); border-color: white; }
 
+        /* MENÚ DE MÚSICA DESPLEGABLE */
         #song-menu {
             display: none;
             position: absolute;
             top: 34px;
             left: 0;
-            background: rgba(30, 15, 22, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(30, 15, 22, 0.98);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 12px;
-            padding: 8px;
-            backdrop-filter: blur(8px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            width: 200px;
-            max-height: 200px;
+            padding: 6px;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            width: 210px;
+            max-height: 220px;
             overflow-y: auto;
+            z-index: 1500;
         }
-        #song-menu.show { display: block; }
+        #song-menu.show { 
+            display: block !important; 
+        }
         .song-option {
-            background: transparent; border: none; color: white;
-            padding: 8px 12px; width: 100%; text-align: left;
-            font-family: inherit; font-size: 11px; border-radius: 8px;
-            cursor: pointer; transition: background 0.2s;
+            background: transparent; 
+            border: none; 
+            color: white;
+            padding: 10px 12px; 
+            width: 100%; 
+            text-align: left;
+            font-family: inherit; 
+            font-size: 11px; 
+            border-radius: 8px;
+            cursor: pointer; 
+            transition: background 0.2s;
+            box-sizing: border-box;
+            touch-action: manipulation;
         }
-        .song-option:hover { background: rgba(255, 255, 255, 0.15); }
-        .song-option.active { color: #ff99cc; font-weight: bold; }
+        .song-option:hover, .song-option:active { 
+            background: rgba(255, 255, 255, 0.2); 
+        }
+        .song-option.active { 
+            color: #ff99cc; 
+            font-weight: bold; 
+        }
 
         #letter-modal {
             position: absolute;
@@ -263,14 +282,13 @@
         }
         #close-letter:hover { background: #994a5e; }
 
-        /* --- AJUSTE COMPACTO PARA PANTALLAS PEQUEÑAS DE CELULAR --- */
         @media (max-width: 600px) {
             #top-bar {
                 top: 8px;
                 left: 4px;
                 right: 4px;
                 gap: 2px;
-                overflow-x: auto; /* Permite desplazamiento si la pantalla es excesivamente estrecha */
+                overflow-x: auto;
                 scrollbar-width: none;
             }
             #top-bar::-webkit-scrollbar { display: none; }
@@ -288,7 +306,7 @@
             }
             #song-menu {
                 top: 30px;
-                width: 170px;
+                width: 180px;
             }
         }
     </style>
@@ -340,7 +358,7 @@
 
     <div id="hint">✿ Toca la pantalla para colocar flores ✿</div>
     
-    <!-- BARRA SUPERIOR DE BOTONES REDUCIDA Y ALINEADA -->
+    <!-- BARRA SUPERIOR DE BOTONES -->
     <div id="top-bar">
         <div class="btn-group" style="position: relative;">
             <button id="music-btn" class="top-btn">🎵 Música: OFF</button>
@@ -373,7 +391,7 @@
     <canvas id="canvas"></canvas>
 
     <script>
-        // --- CONFIGURACIÓN POR DEFECTO Y ALMACENAMIENTO DE PARÁMETROS ---
+        // --- CONFIGURACIÓN Y ALMACENAMIENTO DE PARÁMETROS ---
         const DEFAULT_CONFIG = {
             text: "I love you",
             color: "#ffb6c1",
@@ -530,6 +548,72 @@
             startHeartAnimation();
         });
 
+        // --- LÓGICA DE REPRODUCCIÓN DE MÚSICA COMPATIBLE CON MÓVILES ---
+        let musicPlaying = false;
+        const musicBtn = document.getElementById('music-btn');
+        const menuToggleBtn = document.getElementById('menu-toggle-btn');
+        const songMenu = document.getElementById('song-menu');
+        const audio = document.getElementById('bg-audio');
+        const songOptions = document.querySelectorAll('.song-option');
+
+        let currentSongSrc = songOptions[0].getAttribute('data-src');
+        audio.src = currentSongSrc;
+
+        function toggleSongMenu(e) {
+            if (e) e.stopPropagation();
+            songMenu.classList.toggle('show');
+        }
+
+        menuToggleBtn.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            toggleSongMenu(e);
+        });
+
+        musicBtn.addEventListener('pointerdown', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            songMenu.classList.remove('show');
+
+            if (!musicPlaying) {
+                audio.play().then(() => {
+                    musicPlaying = true;
+                    musicBtn.textContent = '🎵 Música: ON';
+                }).catch(err => {
+                    console.log("Error de reproducción:", err);
+                    musicBtn.textContent = '🎵 Error Audio';
+                });
+            } else {
+                audio.pause();
+                musicPlaying = false;
+                musicBtn.textContent = '⏸️ Música: Off';
+            }
+        });
+
+        songOptions.forEach(option => {
+            const selectSong = (e) => {
+                if (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                songOptions.forEach(opt => opt.classList.remove('active'));
+                option.classList.add('active');
+
+                currentSongSrc = option.getAttribute('data-src');
+                audio.src = currentSongSrc;
+                
+                audio.play().then(() => {
+                    musicPlaying = true;
+                    musicBtn.textContent = '🎵 Música: ON';
+                }).catch(err => {
+                    console.log("Error al cambiar canción:", err);
+                });
+
+                songMenu.classList.remove('show');
+            };
+
+            option.addEventListener('pointerdown', selectSong);
+        });
+
         // --- LÓGICA DEL JARDÍN DE FLORES ---
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d', { alpha: false }); 
@@ -545,66 +629,6 @@
         
         resize();
         setTimeout(resize, 100);
-
-        let musicPlaying = false;
-        const musicBtn = document.getElementById('music-btn');
-        const menuToggleBtn = document.getElementById('menu-toggle-btn');
-        const songMenu = document.getElementById('song-menu');
-        const audio = document.getElementById('bg-audio');
-        const songOptions = document.querySelectorAll('.song-option');
-
-        let currentSongSrc = songOptions[0].getAttribute('data-src');
-        audio.src = currentSongSrc;
-
-        musicBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            songMenu.classList.remove('show');
-
-            if (!musicPlaying) {
-                audio.play().then(() => {
-                    musicPlaying = true;
-                    musicBtn.textContent = '🎵 Música: ON';
-                }).catch(err => {
-                    console.log("Error al reproducir audio:", err);
-                    musicBtn.textContent = '🎵 Error de Audio';
-                });
-            } else {
-                audio.pause();
-                musicPlaying = false;
-                musicBtn.textContent = '⏸️ Música: Off';
-            }
-        });
-
-        menuToggleBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            songMenu.classList.toggle('show');
-        });
-
-        window.addEventListener('click', (e) => {
-            if (!e.target.closest('#secret-heart-menu')) {
-                songMenu.classList.remove('show');
-            }
-        });
-
-        songOptions.forEach(option => {
-            option.addEventListener('click', (e) => {
-                e.stopPropagation();
-                songOptions.forEach(opt => opt.classList.remove('active'));
-                option.classList.add('active');
-
-                currentSongSrc = option.getAttribute('data-src');
-                audio.src = currentSongSrc;
-                
-                audio.play().then(() => {
-                    musicPlaying = true;
-                    musicBtn.textContent = '🎵 Música: ON';
-                }).catch(err => {
-                    console.log("No se pudo reproducir la canción seleccionada:", err);
-                });
-
-                songMenu.classList.remove('show');
-            });
-        });
 
         const dustParticles = Array.from({ length: 50 }, () => ({
             x: Math.random() * window.innerWidth,
@@ -885,6 +909,10 @@
         }
 
         window.addEventListener('pointerdown', (e) => {
+            if (e.target.closest('#song-menu')) return;
+            if (!e.target.closest('#menu-toggle-btn')) {
+                songMenu.classList.remove('show');
+            }
             if (e.target.closest('#top-bar') || e.target.id === 'close-letter' || e.target.closest('#letter-modal') || e.target.closest('#intro-overlay') || e.target.closest('#secret-heart-menu')) return;
             handlePlant(e.clientX, e.clientY);
         });
