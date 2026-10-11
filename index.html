@@ -145,16 +145,16 @@
         }
 
         #hint {
-            position: absolute; top: 60px; width: 100%; text-align: center;
-            color: rgba(255, 255, 255, 0.7); font-size: 12px; pointer-events: none;
+            position: absolute; top: 50px; width: 100%; text-align: center;
+            color: rgba(255, 255, 255, 0.7); font-size: 11px; pointer-events: none;
             letter-spacing: 1px; text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
             z-index: 5; padding: 0 15px; box-sizing: border-box;
         }
         
-        /* BARRA SUPERIOR DE BOTONES */
+        /* BARRA SUPERIOR */
         #top-bar {
             position: absolute;
-            top: 12px;
+            top: 10px;
             left: 8px;
             right: 8px;
             display: flex;
@@ -162,14 +162,12 @@
             align-items: center;
             z-index: 20;
             gap: 4px;
-            flex-wrap: nowrap;
         }
 
         .btn-group {
             display: flex;
             align-items: center;
             gap: 4px;
-            flex-shrink: 0;
         }
 
         .top-btn {
@@ -189,17 +187,16 @@
             justify-content: center;
             box-sizing: border-box;
             height: 28px;
-            touch-action: manipulation;
         }
         .top-btn:hover { background: rgba(255, 255, 255, 0.25); border-color: white; }
 
-        /* MENÚ DE MÚSICA DESPLEGABLE */
+        /* MENÚ FLOTANTE INDEPENDIENTE CON Z-INDEX ELEVADO */
         #song-menu {
             display: none;
-            position: absolute;
-            top: 34px;
-            left: 0;
-            background: rgba(30, 15, 22, 0.98);
+            position: fixed;
+            top: 45px;
+            left: 10px;
+            background: rgba(25, 12, 18, 0.98);
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 12px;
             padding: 6px;
@@ -208,7 +205,7 @@
             width: 210px;
             max-height: 220px;
             overflow-y: auto;
-            z-index: 1500;
+            z-index: 3000;
         }
         #song-menu.show { 
             display: block !important; 
@@ -226,7 +223,6 @@
             cursor: pointer; 
             transition: background 0.2s;
             box-sizing: border-box;
-            touch-action: manipulation;
         }
         .song-option:hover, .song-option:active { 
             background: rgba(255, 255, 255, 0.2); 
@@ -283,30 +279,15 @@
         #close-letter:hover { background: #994a5e; }
 
         @media (max-width: 600px) {
-            #top-bar {
-                top: 8px;
-                left: 4px;
-                right: 4px;
-                gap: 2px;
-                overflow-x: auto;
-                scrollbar-width: none;
-            }
-            #top-bar::-webkit-scrollbar { display: none; }
-            .btn-group {
-                gap: 3px;
-            }
             .top-btn {
                 padding: 4px 6px;
                 font-size: 9px;
                 height: 26px;
             }
-            #hint {
-                top: 48px;
-                font-size: 10px;
-            }
             #song-menu {
-                top: 30px;
-                width: 180px;
+                top: 40px;
+                left: 8px;
+                width: 190px;
             }
         }
     </style>
@@ -358,24 +339,26 @@
 
     <div id="hint">✿ Toca la pantalla para colocar flores ✿</div>
     
-    <!-- BARRA SUPERIOR DE BOTONES -->
+    <!-- BARRA SUPERIOR -->
     <div id="top-bar">
-        <div class="btn-group" style="position: relative;">
+        <div class="btn-group">
             <button id="music-btn" class="top-btn">🎵 Música: OFF</button>
             <button id="menu-toggle-btn" class="top-btn">Canciones ▼</button>
-            <div id="song-menu">
-                <button class="song-option active" data-src="Racing Mind - Lovely Girl.mp3">🎶 Lovely Girl</button>
-                <button class="song-option" data-src="Joe Hisaishi - Merry-Go-Round of Life (from “Howl’s Moving Castle”)(mp3j.cc).mp3">🎶 Merry-Go-Round of Life</button>
-                <button class="song-option" data-src="stargirl - ADTurnUp.mp3">🎶 Stargirl</button>
-                <button class="song-option" data-src="our taste(mp3j.cc).mp3">🎶 our taste</button>
-                <button class="song-option" data-src="Yachin ga Hanbun!(mp3j.cc).mp3">🎶 Yachin ga Hanbun!</button>
-            </div>
         </div>
 
         <div class="btn-group">
             <button id="replay-intro-btn" class="top-btn">Rever Intro ❤️</button>
             <button id="reset-btn" class="top-btn">Limpiar</button>
         </div>
+    </div>
+
+    <!-- MENÚ FLOTANTE INDEPENDIENTE DE CANCIONES -->
+    <div id="song-menu">
+        <button class="song-option active" data-src="Racing Mind - Lovely Girl.mp3">🎶 Lovely Girl</button>
+        <button class="song-option" data-src="Joe Hisaishi - Merry-Go-Round of Life (from “Howl’s Moving Castle”)(mp3j.cc).mp3">🎶 Merry-Go-Round of Life</button>
+        <button class="song-option" data-src="stargirl - ADTurnUp.mp3">🎶 Stargirl</button>
+        <button class="song-option" data-src="our taste(mp3j.cc).mp3">🎶 our taste</button>
+        <button class="song-option" data-src="Yachin ga Hanbun!(mp3j.cc).mp3">🎶 Yachin ga Hanbun!</button>
     </div>
     
     <div id="letter-modal">
@@ -503,7 +486,7 @@
 
         skipBtn.addEventListener('click', dismissIntro);
 
-        document.getElementById('replay-intro-btn').addEventListener('pointerdown', (e) => {
+        document.getElementById('replay-intro-btn').addEventListener('click', (e) => {
             e.stopPropagation();
             startHeartAnimation();
         });
@@ -548,7 +531,7 @@
             startHeartAnimation();
         });
 
-        // --- LÓGICA DE REPRODUCCIÓN DE MÚSICA COMPATIBLE CON MÓVILES ---
+        // --- MANEJO ROBUSTO DEL MENÚ DE MÚSICA Y REPRODUCCIÓN ---
         let musicPlaying = false;
         const musicBtn = document.getElementById('music-btn');
         const menuToggleBtn = document.getElementById('menu-toggle-btn');
@@ -559,18 +542,13 @@
         let currentSongSrc = songOptions[0].getAttribute('data-src');
         audio.src = currentSongSrc;
 
-        function toggleSongMenu(e) {
-            if (e) e.stopPropagation();
+        // Abrir/cerrar menú de canciones de forma limpia
+        menuToggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
             songMenu.classList.toggle('show');
-        }
-
-        menuToggleBtn.addEventListener('pointerdown', (e) => {
-            e.preventDefault();
-            toggleSongMenu(e);
         });
 
-        musicBtn.addEventListener('pointerdown', (e) => {
-            e.preventDefault();
+        musicBtn.addEventListener('click', (e) => {
             e.stopPropagation();
             songMenu.classList.remove('show');
 
@@ -590,11 +568,8 @@
         });
 
         songOptions.forEach(option => {
-            const selectSong = (e) => {
-                if (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                }
+            option.addEventListener('click', (e) => {
+                e.stopPropagation();
                 songOptions.forEach(opt => opt.classList.remove('active'));
                 option.classList.add('active');
 
@@ -609,9 +584,7 @@
                 });
 
                 songMenu.classList.remove('show');
-            };
-
-            option.addEventListener('pointerdown', selectSong);
+            });
         });
 
         // --- LÓGICA DEL JARDÍN DE FLORES ---
@@ -908,12 +881,15 @@
             }
         }
 
-        window.addEventListener('pointerdown', (e) => {
-            if (e.target.closest('#song-menu')) return;
-            if (!e.target.closest('#menu-toggle-btn')) {
+        // Cierre del menú al pulsar en cualquier lugar de la pantalla
+        window.addEventListener('click', (e) => {
+            if (!e.target.closest('#song-menu') && !e.target.closest('#menu-toggle-btn')) {
                 songMenu.classList.remove('show');
             }
-            if (e.target.closest('#top-bar') || e.target.id === 'close-letter' || e.target.closest('#letter-modal') || e.target.closest('#intro-overlay') || e.target.closest('#secret-heart-menu')) return;
+        });
+
+        window.addEventListener('pointerdown', (e) => {
+            if (e.target.closest('#top-bar') || e.target.closest('#song-menu') || e.target.id === 'close-letter' || e.target.closest('#letter-modal') || e.target.closest('#intro-overlay') || e.target.closest('#secret-heart-menu')) return;
             handlePlant(e.clientX, e.clientY);
         });
 
@@ -921,7 +897,7 @@
             document.getElementById('letter-modal').classList.remove('show');
         });
 
-        document.getElementById('reset-btn').addEventListener('pointerdown', (e) => {
+        document.getElementById('reset-btn').addEventListener('click', (e) => {
             e.stopPropagation(); 
             flowers.length = 0; 
             letterShown = false;
