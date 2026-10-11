@@ -68,11 +68,13 @@
             box-shadow: 0 0 25px rgba(255, 105, 180, 0.3);
             border-radius: 16px;
             padding: 20px;
-            width: 310px;
+            width: 90%;
+            max-width: 320px;
             color: #fff;
             z-index: 2000;
             backdrop-filter: blur(10px);
             font-size: 13px;
+            box-sizing: border-box;
         }
         #secret-heart-menu.show {
             display: block;
@@ -99,7 +101,7 @@
             border-radius: 6px;
             color: #fff;
             padding: 4px 8px;
-            width: 130px;
+            width: 120px;
             text-align: right;
             font-family: inherit;
         }
@@ -109,8 +111,13 @@
             width: 40px;
             cursor: pointer;
         }
+        .secret-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
         #apply-heart-config {
-            width: 100%;
+            flex: 2;
             background: #ff7597;
             border: none;
             color: white;
@@ -118,46 +125,68 @@
             border-radius: 10px;
             font-family: inherit;
             cursor: pointer;
-            margin-top: 10px;
             font-weight: bold;
         }
         #apply-heart-config:hover {
             background: #ff4f7b;
         }
+        #reset-heart-config {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 8px;
+            border-radius: 10px;
+            font-family: inherit;
+            cursor: pointer;
+        }
+        #reset-heart-config:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
 
         #hint {
-            position: absolute; top: 60px; width: 100%; text-align: center;
-            color: rgba(255, 255, 255, 0.7); font-size: 15px; pointer-events: none;
-            letter-spacing: 2px; text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+            position: absolute; top: 75px; width: 100%; text-align: center;
+            color: rgba(255, 255, 255, 0.7); font-size: 13px; pointer-events: none;
+            letter-spacing: 1px; text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
             z-index: 5; padding: 0 15px; box-sizing: border-box;
         }
         
         .top-btn {
-            position: absolute; top: 20px;
-            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white; padding: 8px 16px; border-radius: 20px; font-family: inherit; font-size: 12px;
-            cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(5px); z-index: 10;
+            background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.35);
+            color: white; padding: 7px 12px; border-radius: 20px; font-family: inherit; font-size: 11px;
+            cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(5px);
+            white-space: nowrap;
         }
-        .top-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: white; }
-        #reset-btn { right: 20px; }
+        .top-btn:hover { background: rgba(255, 255, 255, 0.25); border-color: white; }
+        
+        /* Contenedor de botones a la derecha */
+        #right-buttons {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 8px;
+            z-index: 20;
+        }
 
         #music-container {
-            position: absolute; top: 20px; left: 20px; z-index: 20;
-            display: flex; gap: 12px;
+            position: absolute; top: 15px; left: 15px; z-index: 20;
+            display: flex; gap: 8px;
         }
         
         #menu-toggle-btn {
             display: inline-block;
-            background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.3);
-            color: white; padding: 8px 12px; border-radius: 20px; font-family: inherit; font-size: 12px;
+            background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.35);
+            color: white; padding: 7px 10px; border-radius: 20px; font-family: inherit; font-size: 11px;
             cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(5px);
+            white-space: nowrap;
         }
-        #menu-toggle-btn:hover { background: rgba(255, 255, 255, 0.2); border-color: white; }
+        #menu-toggle-btn:hover { background: rgba(255, 255, 255, 0.25); }
 
         #song-menu {
             display: none;
             position: absolute;
-            top: 45px;
+            top: 40px;
             left: 0;
             background: rgba(30, 15, 22, 0.95);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -165,7 +194,7 @@
             padding: 8px;
             backdrop-filter: blur(8px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            width: 220px;
+            width: 210px;
             max-height: 200px;
             overflow-y: auto;
         }
@@ -173,7 +202,7 @@
         .song-option {
             background: transparent; border: none; color: white;
             padding: 8px 12px; width: 100%; text-align: left;
-            font-family: inherit; font-size: 12px; border-radius: 8px;
+            font-family: inherit; font-size: 11px; border-radius: 8px;
             cursor: pointer; transition: background 0.2s;
         }
         .song-option:hover { background: rgba(255, 255, 255, 0.15); }
@@ -183,9 +212,9 @@
             position: absolute;
             top: 60px; left: 50%;
             transform: translateX(-50%) scale(0);
-            width: 90%; max-width: 450px; max-height: 85vh; 
+            width: 90%; max-width: 450px; max-height: 80vh; 
             background: #fff9f0; border: 2px solid #e6ccb2;
-            padding: 25px; box-shadow: 0 15px 50px rgba(0,0,0,0.7);
+            padding: 20px; box-shadow: 0 15px 50px rgba(0,0,0,0.7);
             border-radius: 16px; text-align: center;
             z-index: 100; opacity: 0;
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -199,31 +228,57 @@
         }
 
         #letter-modal h2 {
-            color: #593340; margin: 0 0 15px 0; font-family: serif;
-            letter-spacing: 1px; font-size: 22px; flex-shrink: 0; 
+            color: #593340; margin: 0 0 12px 0; font-family: serif;
+            letter-spacing: 1px; font-size: 20px; flex-shrink: 0; 
         }
 
         #letter-text-container {
-            flex-grow: 1; overflow-y: auto; padding-right: 10px;
-            margin-bottom: 15px; text-align: center;
+            flex-grow: 1; overflow-y: auto; padding-right: 8px;
+            margin-bottom: 12px; text-align: center;
             scrollbar-width: thin; scrollbar-color: #e6ccb2 #fff9f0;
         }
         
-        #letter-text-container::-webkit-scrollbar { width: 8px; }
+        #letter-text-container::-webkit-scrollbar { width: 6px; }
         #letter-text-container::-webkit-scrollbar-track { background: #fff9f0; }
         #letter-text-container::-webkit-scrollbar-thumb { background: #e6ccb2; border-radius: 4px; }
 
         #letter-modal p {
-            color: #4a3b40; font-size: 14px; line-height: 1.6; margin: 0; text-align: center;
+            color: #4a3b40; font-size: 13px; line-height: 1.5; margin: 0; text-align: center;
         }
 
         #close-letter {
             background: #b85c74; border: none; color: white;
-            padding: 10px 24px; border-radius: 20px; font-family: inherit;
-            font-size: 14px; cursor: pointer; transition: background 0.3s;
+            padding: 8px 20px; border-radius: 20px; font-family: inherit;
+            font-size: 13px; cursor: pointer; transition: background 0.3s;
             align-self: center; flex-shrink: 0;
         }
         #close-letter:hover { background: #994a5e; }
+
+        /* --- ADAPTACIÓN RESPONSIVA PARA DISPOSITIVOS MÓVILES --- */
+        @media (max-width: 600px) {
+            #music-container {
+                top: 10px;
+                left: 10px;
+                right: 10px;
+                justify-content: flex-start;
+            }
+            #right-buttons {
+                top: 48px;
+                right: 10px;
+            }
+            .top-btn, #menu-toggle-btn {
+                padding: 6px 10px;
+                font-size: 10px;
+            }
+            #hint {
+                top: 85px;
+                font-size: 11px;
+            }
+            #song-menu {
+                top: 35px;
+                width: 190px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -265,13 +320,16 @@
             <label>Fuente:</label>
             <input type="text" id="cfg-font" value="Arial">
         </div>
-        <button id="apply-heart-config">Reiniciar Animación</button>
+        <div class="secret-buttons">
+            <button id="apply-heart-config">Guardar y Probar</button>
+            <button id="reset-heart-config" title="Restaurar valores por defecto">Restaurar</button>
+        </div>
     </div>
 
     <div id="hint">✿ Toca la pantalla para colocar flores ✿</div>
     
     <div id="music-container">
-        <button id="music-btn" class="top-btn" style="position: relative; left: 0; top: 0;">🎵 Música: OFF</button>
+        <button id="music-btn" class="top-btn">🎵 Música: OFF</button>
         <button id="menu-toggle-btn">más canciones ▼</button>
         <div id="song-menu">
             <button class="song-option active" data-src="Racing Mind - Lovely Girl.mp3">🎶 Lovely Girl</button>
@@ -282,7 +340,11 @@
         </div>
     </div>
 
-    <button id="reset-btn" class="top-btn">Limpiar</button>
+    <!-- Grupo de botones superiores derechos -->
+    <div id="right-buttons">
+        <button id="replay-intro-btn" class="top-btn">Rever Intro ❤️</button>
+        <button id="reset-btn" class="top-btn">Limpiar</button>
+    </div>
     
     <div id="letter-modal">
         <h2>Hola Corazon 💗</h2>
@@ -297,26 +359,50 @@
     <canvas id="canvas"></canvas>
 
     <script>
-        // --- CONFIGURACIÓN Y ANIMACIÓN DEL CORAZÓN ---
-        const hCanvas = document.getElementById('heartCanvas');
-        const hCtx = hCanvas.getContext('2d');
-        const introOverlay = document.getElementById('intro-overlay');
-        const skipBtn = document.getElementById('skip-intro');
-
-        let heartConfig = {
+        // --- CONFIGURACIÓN POR DEFECTO Y ALMACENAMIENTO DE PARÁMETROS ---
+        const DEFAULT_CONFIG = {
             text: "I love you",
             color: "#ffb6c1",
             scaleStart: 11,
             scaleEnd: 16,
             speed: 15,
+            delay: 1000,
             font: "Arial"
         };
 
-        let heartStartDelay = 1000; // Delay inicial en milisegundos
+        function loadHeartConfig() {
+            const saved = localStorage.getItem('heart_config');
+            if (saved) {
+                try {
+                    return JSON.parse(saved);
+                } catch(e) {
+                    return { ...DEFAULT_CONFIG };
+                }
+            }
+            return { ...DEFAULT_CONFIG };
+        }
+
+        let heartConfig = loadHeartConfig();
+
+        function syncInputsWithConfig() {
+            document.getElementById('cfg-text').value = heartConfig.text;
+            document.getElementById('cfg-color').value = heartConfig.color;
+            document.getElementById('cfg-scale-start').value = heartConfig.scaleStart;
+            document.getElementById('cfg-scale-end').value = heartConfig.scaleEnd;
+            document.getElementById('cfg-speed').value = heartConfig.speed;
+            document.getElementById('cfg-delay').value = heartConfig.delay;
+            document.getElementById('cfg-font').value = heartConfig.font;
+        }
+
+        // --- ANIMACIÓN DEL CORAZÓN ---
+        const hCanvas = document.getElementById('heartCanvas');
+        const hCtx = hCanvas.getContext('2d');
+        const introOverlay = document.getElementById('intro-overlay');
+        const skipBtn = document.getElementById('skip-intro');
 
         function resizeHeartCanvas() {
-            hCanvas.width = Math.min(window.innerWidth, 500);
-            hCanvas.height = Math.min(window.innerHeight, 500);
+            hCanvas.width = Math.min(window.innerWidth * 0.9, 450);
+            hCanvas.height = Math.min(window.innerHeight * 0.9, 450);
         }
         resizeHeartCanvas();
 
@@ -364,14 +450,13 @@
             introOverlay.style.display = 'flex';
             introOverlay.classList.remove('fade-out');
 
-            // Retraso programado antes de iniciar la iteración de dibujo
             delayTimer = setTimeout(() => {
                 heartTimer = setInterval(drawHeartStep, parseInt(heartConfig.speed));
 
                 const totalSteps = (heartConfig.scaleEnd - heartConfig.scaleStart) * 120;
                 const totalDuration = (totalSteps * heartConfig.speed) + 1500;
                 autoDismissTimer = setTimeout(dismissIntro, Math.max(totalDuration, 5000));
-            }, heartStartDelay);
+            }, parseInt(heartConfig.delay));
         }
 
         function dismissIntro() {
@@ -385,11 +470,19 @@
         }
 
         skipBtn.addEventListener('click', dismissIntro);
+
+        document.getElementById('replay-intro-btn').addEventListener('pointerdown', (e) => {
+            e.stopPropagation();
+            startHeartAnimation();
+        });
+
+        syncInputsWithConfig();
         startHeartAnimation();
 
-        // --- MENÚ SECRETO PARA PARÁMETROS DEL CORAZÓN (Ctrl + Shift + H / Cmd + Shift + H) ---
+        // --- MENÚ SECRETO PARA PARÁMETROS DEL CORAZÓN (Ctrl + Shift + H) ---
         const secretMenu = document.getElementById('secret-heart-menu');
         const applyBtn = document.getElementById('apply-heart-config');
+        const resetCfgBtn = document.getElementById('reset-heart-config');
 
         window.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === 'h') {
@@ -399,15 +492,26 @@
         });
 
         applyBtn.addEventListener('click', () => {
-            heartConfig.text = document.getElementById('cfg-text').value;
-            heartConfig.color = document.getElementById('cfg-color').value;
-            heartConfig.scaleStart = parseInt(document.getElementById('cfg-scale-start').value);
-            heartConfig.scaleEnd = parseInt(document.getElementById('cfg-scale-end').value);
-            heartConfig.speed = parseInt(document.getElementById('cfg-speed').value);
-            heartConfig.font = document.getElementById('cfg-font').value;
-            
-            heartStartDelay = parseInt(document.getElementById('cfg-delay').value) || 0;
+            heartConfig = {
+                text: document.getElementById('cfg-text').value,
+                color: document.getElementById('cfg-color').value,
+                scaleStart: parseInt(document.getElementById('cfg-scale-start').value),
+                scaleEnd: parseInt(document.getElementById('cfg-scale-end').value),
+                speed: parseInt(document.getElementById('cfg-speed').value),
+                delay: parseInt(document.getElementById('cfg-delay').value) || 0,
+                font: document.getElementById('cfg-font').value
+            };
 
+            localStorage.setItem('heart_config', JSON.stringify(heartConfig));
+
+            secretMenu.classList.remove('show');
+            startHeartAnimation();
+        });
+
+        resetCfgBtn.addEventListener('click', () => {
+            heartConfig = { ...DEFAULT_CONFIG };
+            localStorage.removeItem('heart_config');
+            syncInputsWithConfig();
             secretMenu.classList.remove('show');
             startHeartAnimation();
         });
@@ -767,7 +871,7 @@
         }
 
         window.addEventListener('pointerdown', (e) => {
-            if (e.target.closest('#music-container') || e.target.id === 'reset-btn' || e.target.id === 'close-letter' || e.target.closest('#letter-modal') || e.target.closest('#intro-overlay') || e.target.closest('#secret-heart-menu')) return;
+            if (e.target.closest('#music-container') || e.target.closest('#right-buttons') || e.target.id === 'close-letter' || e.target.closest('#letter-modal') || e.target.closest('#intro-overlay') || e.target.closest('#secret-heart-menu')) return;
             handlePlant(e.clientX, e.clientY);
         });
 
