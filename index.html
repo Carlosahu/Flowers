@@ -151,42 +151,49 @@
             z-index: 5; padding: 0 15px; box-sizing: border-box;
         }
         
-        .top-btn {
-            background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.35);
-            color: white; padding: 7px 12px; border-radius: 20px; font-family: inherit; font-size: 11px;
-            cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(5px);
-            white-space: nowrap;
-        }
-        .top-btn:hover { background: rgba(255, 255, 255, 0.25); border-color: white; }
-        
-        /* Contenedor de botones a la derecha */
-        #right-buttons {
+        /* BARRA SUPERIOR DE BOTONES ALINEADOS */
+        #top-bar {
             position: absolute;
             top: 15px;
+            left: 15px;
             right: 15px;
             display: flex;
-            gap: 8px;
+            justify-content: space-between;
+            align-items: center;
             z-index: 20;
+            gap: 10px;
         }
 
-        #music-container {
-            position: absolute; top: 15px; left: 15px; z-index: 20;
-            display: flex; gap: 8px;
+        .btn-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        
-        #menu-toggle-btn {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.35);
-            color: white; padding: 7px 10px; border-radius: 20px; font-family: inherit; font-size: 11px;
-            cursor: pointer; transition: all 0.3s ease; backdrop-filter: blur(5px);
+
+        .top-btn {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
             white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            height: 34px;
         }
-        #menu-toggle-btn:hover { background: rgba(255, 255, 255, 0.25); }
+        .top-btn:hover { background: rgba(255, 255, 255, 0.25); border-color: white; }
 
         #song-menu {
             display: none;
             position: absolute;
-            top: 40px;
+            top: 42px;
             left: 0;
             background: rgba(30, 15, 22, 0.95);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -254,28 +261,30 @@
         }
         #close-letter:hover { background: #994a5e; }
 
-        /* --- ADAPTACIÓN RESPONSIVA PARA DISPOSITIVOS MÓVILES --- */
+        /* --- ADAPTACIÓN RESPONSIVA Y ALINEACIÓN PARA MÓVILES --- */
         @media (max-width: 600px) {
-            #music-container {
+            #top-bar {
                 top: 10px;
                 left: 10px;
                 right: 10px;
-                justify-content: flex-start;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                gap: 6px;
             }
-            #right-buttons {
-                top: 48px;
-                right: 10px;
+            .btn-group {
+                gap: 6px;
             }
-            .top-btn, #menu-toggle-btn {
+            .top-btn {
                 padding: 6px 10px;
                 font-size: 10px;
+                height: 30px;
             }
             #hint {
                 top: 85px;
                 font-size: 11px;
             }
             #song-menu {
-                top: 35px;
+                top: 36px;
                 width: 190px;
             }
         }
@@ -328,22 +337,24 @@
 
     <div id="hint">✿ Toca la pantalla para colocar flores ✿</div>
     
-    <div id="music-container">
-        <button id="music-btn" class="top-btn">🎵 Música: OFF</button>
-        <button id="menu-toggle-btn">más canciones ▼</button>
-        <div id="song-menu">
-            <button class="song-option active" data-src="Racing Mind - Lovely Girl.mp3">🎶 Lovely Girl</button>
-            <button class="song-option" data-src="Joe Hisaishi - Merry-Go-Round of Life (from “Howl’s Moving Castle”)(mp3j.cc).mp3">🎶 Merry-Go-Round of Life</button>
-            <button class="song-option" data-src="stargirl - ADTurnUp.mp3">🎶 Stargirl</button>
-            <button class="song-option" data-src="our taste(mp3j.cc).mp3">🎶 our taste</button>
-            <button class="song-option" data-src="Yachin ga Hanbun!(mp3j.cc).mp3">🎶 Yachin ga Hanbun!</button>
+    <!-- BARRA SUPERIOR CON TODOS LOS BOTONES ALINEADOS -->
+    <div id="top-bar">
+        <div class="btn-group" style="position: relative;">
+            <button id="music-btn" class="top-btn">🎵 Música: OFF</button>
+            <button id="menu-toggle-btn" class="top-btn">más canciones ▼</button>
+            <div id="song-menu">
+                <button class="song-option active" data-src="Racing Mind - Lovely Girl.mp3">🎶 Lovely Girl</button>
+                <button class="song-option" data-src="Joe Hisaishi - Merry-Go-Round of Life (from “Howl’s Moving Castle”)(mp3j.cc).mp3">🎶 Merry-Go-Round of Life</button>
+                <button class="song-option" data-src="stargirl - ADTurnUp.mp3">🎶 Stargirl</button>
+                <button class="song-option" data-src="our taste(mp3j.cc).mp3">🎶 our taste</button>
+                <button class="song-option" data-src="Yachin ga Hanbun!(mp3j.cc).mp3">🎶 Yachin ga Hanbun!</button>
+            </div>
         </div>
-    </div>
 
-    <!-- Grupo de botones superiores derechos -->
-    <div id="right-buttons">
-        <button id="replay-intro-btn" class="top-btn">Rever Intro ❤️</button>
-        <button id="reset-btn" class="top-btn">Limpiar</button>
+        <div class="btn-group">
+            <button id="replay-intro-btn" class="top-btn">Rever Intro ❤️</button>
+            <button id="reset-btn" class="top-btn">Limpiar</button>
+        </div>
     </div>
     
     <div id="letter-modal">
@@ -871,7 +882,7 @@
         }
 
         window.addEventListener('pointerdown', (e) => {
-            if (e.target.closest('#music-container') || e.target.closest('#right-buttons') || e.target.id === 'close-letter' || e.target.closest('#letter-modal') || e.target.closest('#intro-overlay') || e.target.closest('#secret-heart-menu')) return;
+            if (e.target.closest('#top-bar') || e.target.id === 'close-letter' || e.target.closest('#letter-modal') || e.target.closest('#intro-overlay') || e.target.closest('#secret-heart-menu')) return;
             handlePlant(e.clientX, e.clientY);
         });
 
