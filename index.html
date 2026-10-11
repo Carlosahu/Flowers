@@ -145,39 +145,41 @@
         }
 
         #hint {
-            position: absolute; top: 75px; width: 100%; text-align: center;
-            color: rgba(255, 255, 255, 0.7); font-size: 13px; pointer-events: none;
+            position: absolute; top: 60px; width: 100%; text-align: center;
+            color: rgba(255, 255, 255, 0.7); font-size: 12px; pointer-events: none;
             letter-spacing: 1px; text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
             z-index: 5; padding: 0 15px; box-sizing: border-box;
         }
         
-        /* BARRA SUPERIOR DE BOTONES ALINEADOS */
+        /* BARRA SUPERIOR AJUSTADA */
         #top-bar {
             position: absolute;
-            top: 15px;
-            left: 15px;
-            right: 15px;
+            top: 12px;
+            left: 8px;
+            right: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 20;
-            gap: 10px;
+            gap: 4px;
+            flex-wrap: nowrap;
         }
 
         .btn-group {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 4px;
+            flex-shrink: 0;
         }
 
         .top-btn {
             background: rgba(255, 255, 255, 0.12);
             border: 1px solid rgba(255, 255, 255, 0.35);
             color: white;
-            padding: 8px 14px;
-            border-radius: 20px;
+            padding: 5px 8px;
+            border-radius: 16px;
             font-family: inherit;
-            font-size: 12px;
+            font-size: 10px;
             cursor: pointer;
             transition: all 0.3s ease;
             backdrop-filter: blur(5px);
@@ -186,14 +188,14 @@
             align-items: center;
             justify-content: center;
             box-sizing: border-box;
-            height: 34px;
+            height: 28px;
         }
         .top-btn:hover { background: rgba(255, 255, 255, 0.25); border-color: white; }
 
         #song-menu {
             display: none;
             position: absolute;
-            top: 42px;
+            top: 34px;
             left: 0;
             background: rgba(30, 15, 22, 0.95);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -201,7 +203,7 @@
             padding: 8px;
             backdrop-filter: blur(8px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            width: 210px;
+            width: 200px;
             max-height: 200px;
             overflow-y: auto;
         }
@@ -261,31 +263,32 @@
         }
         #close-letter:hover { background: #994a5e; }
 
-        /* --- ADAPTACIÓN RESPONSIVA Y ALINEACIÓN PARA MÓVILES --- */
+        /* --- AJUSTE COMPACTO PARA PANTALLAS PEQUEÑAS DE CELULAR --- */
         @media (max-width: 600px) {
             #top-bar {
-                top: 10px;
-                left: 10px;
-                right: 10px;
-                flex-wrap: wrap;
-                justify-content: space-between;
-                gap: 6px;
+                top: 8px;
+                left: 4px;
+                right: 4px;
+                gap: 2px;
+                overflow-x: auto; /* Permite desplazamiento si la pantalla es excesivamente estrecha */
+                scrollbar-width: none;
             }
+            #top-bar::-webkit-scrollbar { display: none; }
             .btn-group {
-                gap: 6px;
+                gap: 3px;
             }
             .top-btn {
-                padding: 6px 10px;
-                font-size: 10px;
-                height: 30px;
+                padding: 4px 6px;
+                font-size: 9px;
+                height: 26px;
             }
             #hint {
-                top: 85px;
-                font-size: 11px;
+                top: 48px;
+                font-size: 10px;
             }
             #song-menu {
-                top: 36px;
-                width: 190px;
+                top: 30px;
+                width: 170px;
             }
         }
     </style>
@@ -337,11 +340,11 @@
 
     <div id="hint">✿ Toca la pantalla para colocar flores ✿</div>
     
-    <!-- BARRA SUPERIOR CON TODOS LOS BOTONES ALINEADOS -->
+    <!-- BARRA SUPERIOR DE BOTONES REDUCIDA Y ALINEADA -->
     <div id="top-bar">
         <div class="btn-group" style="position: relative;">
             <button id="music-btn" class="top-btn">🎵 Música: OFF</button>
-            <button id="menu-toggle-btn" class="top-btn">más canciones ▼</button>
+            <button id="menu-toggle-btn" class="top-btn">Canciones ▼</button>
             <div id="song-menu">
                 <button class="song-option active" data-src="Racing Mind - Lovely Girl.mp3">🎶 Lovely Girl</button>
                 <button class="song-option" data-src="Joe Hisaishi - Merry-Go-Round of Life (from “Howl’s Moving Castle”)(mp3j.cc).mp3">🎶 Merry-Go-Round of Life</button>
